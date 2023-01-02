@@ -1,0 +1,281 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "PlayerCharacter.h"
+#include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/InputComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/Controller.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "CombatComponent.h"
+#include <Kismet/KismetSystemLibrary.h>
+#include <Kismet/KismetMathLibrary.h>
+
+// Sets default values
+APlayerCharacter::APlayerCharacter()
+{
+	PrimaryActorTick.bCanEverTick = true;
+
+	// 캡슐
+	GetCapsuleComponent()->InitCapsuleSize(40.f, 90.0f);
+
+	// 스켈레탈 메쉬
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> meshAsset(TEXT("SkeletalMesh'/Game/MarketplaceAssets/ARPG_Samurai/Demo/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"));
+	if (meshAsset.Succeeded())
+	{
+		GetMesh()->SetSkeletalMesh(meshAsset.Object);
+		GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, -90.f, 0.f));
+	}
+
+	// 칼
+	Katana = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Katana"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> katanaAsset(TEXT("StaticMesh'/Game/MarketplaceAssets/ARPG_Samurai/Demo/Weapon/Mesh/katana.katana'"));
+	if (katanaAsset.Succeeded())
+	{
+		Katana->SetStaticMesh(katanaAsset.Object);
+		Katana->SetupAttachment(GetMesh(), TEXT("katana3"));
+		Katana->SetCollisionProfileName(TEXT("NoCollision"));
+	}
+
+	// 칼집
+	Scabbard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Scabbard"));
+	Scabbard->SetupAttachment(GetMesh(), TEXT("scabbard1"));
+	Scabbard->SetCollisionProfileName(TEXT("NoCollision"));
+
+	// 스프링암
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->TargetArmLength = 300.0f;
+	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->bEnableCameraLag = true;	// 카메라 랙 활성화
+	CameraBoom->CameraLagSpeed = 8.0f;
+
+	// 카메라
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	FollowCamera->bUsePawnControlRotation = false;
+
+	// 회전 설정
+	TurnRateGamepad = 50.f;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
+
+	// 이동 설정
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
+	GetCharacterMovement()->JumpZVelocity = 400.f;
+	GetCharacterMovement()->AirControl = 0.35f;
+	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+
+	// 공격 판정을 관리하는 컴포넌트
+	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
+}
+
+void APlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// 기본 무기 설정
+	CombatComp->SetMainWeapon(Katana);
+
+	// 기본 무기 최대 콤보 수 설정
+	MaxAttackCount = Attacks.Num() - 1;
+}
+
+void APlayerCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// 타겟팅한 적 있으면 Yaw 회전
+	if (bIsTargeting)
+	{
+		RotateToEnemy();
+		// 거리가 멀어지면 타겟 해제
+		if (GetDistanceTo(EnemyTarget) > 600.f)
+		{
+			EnemyTarget = nullptr;
+			bIsTargeting = false;
+		}
+	}
+}
+
+// 키 입력
+void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	check(PlayerInputComponent);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::Attack);
+	PlayerInputComponent->BindAction("Guard", IE_Pressed, this, &APlayerCharacter::Guard);
+	PlayerInputComponent->BindAction("Guard", IE_Released, this, &APlayerCharacter::StopGuard);
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::Interact);
+
+	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &APlayerCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("Move Right / Left", this, &APlayerCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("Turn Right / Left Mouse", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("Turn Right / Left Gamepad", this, &APlayerCharacter::TurnAtRate);
+	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("Look Up / Down Gamepad", this, &APlayerCharacter::LookUpAtRate);
+}
+
+void APlayerCharacter::MoveForward(float Value)
+{
+	if ((Controller != nullptr) && (Value != 0.0f))
+	{
+		// find out which way is forward
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		// get forward vector
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, Value);
+	}
+}
+
+void APlayerCharacter::MoveRight(float Value)
+{
+	if ((Controller != nullptr) && (Value != 0.0f))
+	{
+		// find out which way is right
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		// get right vector 
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		// add movement in that direction
+		AddMovementInput(Direction, Value);
+	}
+}
+
+void APlayerCharacter::TurnAtRate(float Rate)
+{
+	// calculate delta for this frame from the rate information
+	AddControllerYawInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
+}
+
+void APlayerCharacter::LookUpAtRate(float Rate)
+{
+	// calculate delta for this frame from the rate information
+	AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
+}
+
+void APlayerCharacter::Attack()
+{
+	// TODO: 상태에 따라 공격할 수 있는지 판단
+
+	// 오토 타겟팅할 적 탐색
+	FindNearestEnemy();
+
+	// 타겟팅한 적을 향해 Yaw 회전
+	RotateToEnemy();
+
+	// 공격 몽타주 실행
+	UKismetSystemLibrary::PrintString(this, TEXT("Attack Count : ") + FString::FromInt(AttackCount));
+	PlayAnimMontage(Attacks[AttackCount]);
+
+	// 콤보 카운트
+	if (AttackCount < MaxAttackCount)
+	{
+		AttackCount++;
+	}
+	else
+	{
+		AttackCount = 0;
+	}
+}
+
+void APlayerCharacter::Guard()
+{
+
+}
+
+void APlayerCharacter::StopGuard()
+{
+
+}
+
+void APlayerCharacter::Interact()
+{
+
+}
+
+bool APlayerCharacter::FindNearestEnemy()
+{
+	// 트레이스 결과를 저장
+	TArray<FHitResult> hits;
+	// 트레이스 범위
+	FVector start = GetActorLocation();
+	FVector end = GetActorLocation() + GetActorForwardVector() * 100.f;
+	float radius = 200.f;
+	// 찾을 오브젝트 타입 = Pawn
+	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
+	TEnumAsByte<EObjectTypeQuery> pawn = UEngineTypes::ConvertToObjectType(ECC_Pawn);
+	objectTypes.Add(pawn);
+	// 무시할 오브젝트 타입 = 없음
+	TArray< AActor* > actorsToIgnore;
+
+	UKismetSystemLibrary::SphereTraceMultiForObjects(this, start, end, radius, objectTypes, false, actorsToIgnore,
+		EDrawDebugTrace::ForDuration, hits, true);
+
+	AActor* nearestEnemy = nullptr;
+	float lastDistanceToEnemy = radius + 100.f;
+	float distanceToEnemy;
+
+	// 가장 가까운 적 찾기
+	for (auto hit : hits)	// 모든 FHitResult에 for문 돌리기
+	{
+		if (hit.GetActor())
+		{
+			// 적과의 거리 체크
+			distanceToEnemy = GetDistanceTo(hit.GetActor());
+			// 가장 가까운 적인지 체크
+			if (distanceToEnemy <= lastDistanceToEnemy)
+			{
+				lastDistanceToEnemy = distanceToEnemy;
+				nearestEnemy = hit.GetActor();	// 더 가까우면 nearestEnemy 갱신
+				// 디버그
+				UKismetSystemLibrary::PrintString(this, TEXT("Auto Target : ") + nearestEnemy->GetName());
+			}
+		}
+	}
+
+	// nearestEnemy를 찾았을 경우에만 액터를 반환
+	if (nearestEnemy)
+	{
+		EnemyTarget = nearestEnemy;
+		bIsTargeting = true;
+		return true;
+	}
+	else
+	{
+		bIsTargeting = false;
+		return false;
+	}
+}
+
+void APlayerCharacter::RotateToEnemy()
+{
+	// 타겟팅한 적이 있는 경우
+	if (EnemyTarget)
+	{
+		// 적을 향해 Yaw 회전
+		FRotator newRotation;
+		newRotation.Pitch = GetActorRotation().Pitch;
+		newRotation.Roll = GetActorRotation().Roll;
+		newRotation.Yaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), EnemyTarget->GetActorLocation()).Yaw;
+		SetActorRotation(newRotation);
+	}
+}
+
+void APlayerCharacter::TakeDownEnemy()
+{
+	FindNearestEnemy();
+
+	// TODO: 적이 테이크다운 가능한 상태인지 확인하고 테이크다운
+}
