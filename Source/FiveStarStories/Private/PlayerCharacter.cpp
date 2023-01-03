@@ -12,6 +12,8 @@
 #include <Kismet/KismetSystemLibrary.h>
 #include <Kismet/KismetMathLibrary.h>
 #include "PlayerAnimInstance.h"
+// TEST CODE
+#include "Dummy.h"	
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -182,7 +184,7 @@ void APlayerCharacter::Attack()
 	if (CanAttack() == false) return;
 
 	// 오토 타겟팅할 적 탐색
-	FindNearestEnemy();
+	TryAutoTargeting();
 
 	// 타겟팅한 적을 향해 Yaw 회전
 	RotateToEnemy();
@@ -212,6 +214,7 @@ void APlayerCharacter::Guard()
 	animIns->SetIsBlocking(true);
 	// 이동속도 감소
 	GetCharacterMovement()->MaxWalkSpeed = 200.f;
+	GetCharacterMovement()->MaxAcceleration = 512.f;
 }
 
 void APlayerCharacter::StopGuard()
@@ -221,6 +224,7 @@ void APlayerCharacter::StopGuard()
 	animIns->SetIsBlocking(false);
 	// 이동속도 초기화
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MaxAcceleration = 2048.f;
 }
 
 void APlayerCharacter::Interact()
@@ -280,7 +284,25 @@ bool APlayerCharacter::CanDash()
 	return true;
 }
 
-bool APlayerCharacter::FindNearestEnemy()
+void APlayerCharacter::TryAutoTargeting()
+{
+	AActor* target = GetNearestEnemy();
+
+	// 타게팅할 적을 찾았을 경우
+	if (target != nullptr)
+	{
+		EnemyTarget = target;
+		bIsTargeting = true;
+	}
+	// 타게팅할 적을 못 찾았을 경우
+	else
+	{
+		EnemyTarget = nullptr;
+		bIsTargeting = false;
+	}
+}
+
+AActor* APlayerCharacter::GetNearestEnemy()
 {
 	// 트레이스 결과를 저장
 	TArray<FHitResult> hits;
@@ -298,6 +320,7 @@ bool APlayerCharacter::FindNearestEnemy()
 	UKismetSystemLibrary::SphereTraceMultiForObjects(this, start, end, radius, objectTypes, false, actorsToIgnore,
 		EDrawDebugTrace::ForDuration, hits, true);
 
+	// 반환할 액터를 담을 변수
 	AActor* nearestEnemy = nullptr;
 	float lastDistanceToEnemy = radius + 100.f;
 	float distanceToEnemy;
@@ -319,19 +342,8 @@ bool APlayerCharacter::FindNearestEnemy()
 			}
 		}
 	}
-
-	// nearestEnemy를 찾았을 경우에만 액터를 반환
-	if (nearestEnemy)
-	{
-		EnemyTarget = nearestEnemy;
-		bIsTargeting = true;
-		return true;
-	}
-	else
-	{
-		bIsTargeting = false;
-		return false;
-	}
+	// 찾은 액터를 반환. 못찾았으면 nullptr 그대로 반환함
+	return nearestEnemy;
 }
 
 void APlayerCharacter::RotateToEnemy()
@@ -348,9 +360,9 @@ void APlayerCharacter::RotateToEnemy()
 	}
 }
 
-void APlayerCharacter::TakeDownEnemy()
+void APlayerCharacter::TakeDown()
 {
-	FindNearestEnemy();
+	GetNearestEnemy();
 
 	// TODO: 적이 테이크다운 가능한 상태인지 확인하고 테이크다운
 }

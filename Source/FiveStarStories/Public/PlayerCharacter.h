@@ -63,12 +63,13 @@ protected:
 	bool CanInteract();
 	bool CanDash();
 	
-	// 오토 타게팅
-	bool FindNearestEnemy();
+	// 오토 타게팅 
+	void TryAutoTargeting();
+	AActor* GetNearestEnemy();
 	void RotateToEnemy();
 
 	// 테이크다운
-	void TakeDownEnemy();
+	void TakeDown();
 
 private:
 	// 무브셋
