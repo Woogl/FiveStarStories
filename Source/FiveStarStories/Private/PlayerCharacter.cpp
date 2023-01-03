@@ -11,6 +11,7 @@
 #include "CombatComponent.h"
 #include <Kismet/KismetSystemLibrary.h>
 #include <Kismet/KismetMathLibrary.h>
+#include "PlayerAnimInstance.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -49,7 +50,7 @@ APlayerCharacter::APlayerCharacter()
 	CameraBoom->TargetArmLength = 300.0f;
 	CameraBoom->bUsePawnControlRotation = true;
 	CameraBoom->bEnableCameraLag = true;	// 카메라 랙 활성화
-	CameraBoom->CameraLagSpeed = 8.0f;
+	CameraBoom->CameraLagSpeed = 10.f;
 
 	// 카메라
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -95,7 +96,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	{
 		RotateToEnemy();
 		// 거리가 멀어지면 타겟 해제
-		if (GetDistanceTo(EnemyTarget) > 600.f)
+		if (GetDistanceTo(EnemyTarget) > 500.f)
 		{
 			EnemyTarget = nullptr;
 			bIsTargeting = false;
@@ -109,12 +110,14 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APlayerCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::Attack);
 	PlayerInputComponent->BindAction("Guard", IE_Pressed, this, &APlayerCharacter::Guard);
 	PlayerInputComponent->BindAction("Guard", IE_Released, this, &APlayerCharacter::StopGuard);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::Interact);
+	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &APlayerCharacter::Dash);
+	PlayerInputComponent->BindAction("Dash", IE_Released, this, &APlayerCharacter::StopDash);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &APlayerCharacter::MoveRight);
@@ -165,9 +168,18 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
 }
 
+void APlayerCharacter::Jump()
+{
+	if (CanDoJump() == true)
+	{
+		ACharacter::Jump();
+	}
+}
+
 void APlayerCharacter::Attack()
 {
-	// TODO: 상태에 따라 공격할 수 있는지 판단
+	// 공격 가능한 상태인지 체크
+	if (CanAttack() == false) return;
 
 	// 오토 타겟팅할 적 탐색
 	FindNearestEnemy();
@@ -192,17 +204,80 @@ void APlayerCharacter::Attack()
 
 void APlayerCharacter::Guard()
 {
+	// 방어 가능한 상태인지 체크
+	if (CanGuard() == false) return;
 
+	bIsBlocking = true;
+	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	animIns->SetIsBlocking(true);
+	// 이동속도 감소
+	GetCharacterMovement()->MaxWalkSpeed = 200.f;
 }
 
 void APlayerCharacter::StopGuard()
 {
-
+	bIsBlocking = false;
+	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	animIns->SetIsBlocking(false);
+	// 이동속도 초기화
+	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 }
 
 void APlayerCharacter::Interact()
 {
 
+}
+
+void APlayerCharacter::Dash()
+{
+	// 대시 가능한 상태인지 체크
+	if (CanDash() == false) return;
+
+	bIsDashing = true;
+	// 이동속도 증가
+	GetCharacterMovement()->MaxWalkSpeed = 800.f;
+}
+
+void APlayerCharacter::StopDash()
+{
+	bIsDashing = false;
+	// 이동속도 초기화
+	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+}
+
+bool APlayerCharacter::CanDoJump()
+{
+	// TODO: 조건 추가하기
+
+	return true;
+}
+
+bool APlayerCharacter::CanAttack()
+{
+	// TODO: 조건 추가하기
+
+	return true;
+}
+
+bool APlayerCharacter::CanGuard()
+{
+	// TODO: 조건 추가하기
+
+	return true;
+}
+
+bool APlayerCharacter::CanInteract()
+{
+	// TODO: 조건 추가하기
+
+	return true;
+}
+
+bool APlayerCharacter::CanDash()
+{
+	// TODO: 조건 추가하기
+
+	return true;
 }
 
 bool APlayerCharacter::FindNearestEnemy()

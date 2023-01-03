@@ -48,11 +48,21 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	// 액션 입력
+	void Jump();
 	void Attack();
 	void Guard();
 	void StopGuard();
 	void Interact();
+	void Dash();
+	void StopDash();
 
+	// 액션 실행 가능 여부 체크
+	bool CanDoJump();
+	bool CanAttack();
+	bool CanGuard();
+	bool CanInteract();
+	bool CanDash();
+	
 	// 오토 타게팅
 	bool FindNearestEnemy();
 	void RotateToEnemy();
@@ -69,13 +79,22 @@ private:
 	TArray<UAnimMontage*> TakeDowns;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
-	TArray<UAnimMontage*> Guards;
+	TArray<UAnimMontage*> GuardHits;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
+	UAnimMontage* GuardBreak;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
 	TArray<UAnimMontage*> Interactions;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	TArray<UAnimMontage*> HitReactions;
+
+	// 캐릭터 상태
+	bool bIsTargeting = false;
+	bool bIsAttacking = false;
+	bool bIsBlocking = false;
+	bool bIsDashing = false;
 
 	// 공격 콤보 카운트
 	UPROPERTY()
@@ -84,9 +103,6 @@ private:
 	// 최대 공격 콤보 카운트
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
 	int MaxAttackCount;
-
-	// 오토 타게팅 상태 여부
-	bool bIsTargeting = false;
 
 	// 오토 타게팅 대상
 	UPROPERTY()
