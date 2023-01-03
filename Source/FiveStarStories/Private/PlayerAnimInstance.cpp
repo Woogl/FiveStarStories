@@ -8,6 +8,7 @@
 
 UPlayerAnimInstance::UPlayerAnimInstance()
 {
+	bIsBlocking = false;
 	Velocity = FVector(0.f);
 	GroundSpeed = 0.f;
 	bIsFalling = false;
@@ -27,4 +28,9 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		Direction = CalculateDirection(Velocity, Character->GetActorRotation());	// UKismetAnimationLibrary::CalculateDirection ¾²´Â°Ô ³´³ª?
 		bIsFalling = Character->GetCharacterMovement()->IsFalling();
 	}
+}
+
+void UPlayerAnimInstance::SetIsBlocking(bool Value)
+{
+	bIsBlocking = Value;
 }

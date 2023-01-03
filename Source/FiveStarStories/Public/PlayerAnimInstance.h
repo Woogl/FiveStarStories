@@ -34,4 +34,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance", meta = (AllowPrivateAccess = "true"))
 	bool bIsFalling;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance", meta = (AllowPrivateAccess = "true"))
+	bool bIsBlocking;
+
+public:
+	void SetIsBlocking(bool Value);
 };
