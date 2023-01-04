@@ -38,10 +38,6 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
 	class UCombatComponent* CombatComp;
 
-	// 테이크다운 시 위치 조정하는 컴포넌트
-	//UPROPERTY(VisibleAnywhere, Category = "Combat")
-	//class UMotionWarpingComponent* MotionWarpComp;
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -75,6 +71,7 @@ protected:
 
 	// 오토 타게팅 
 	void TryAutoTargeting();
+	UFUNCTION(BlueprintCallable)
 	AActor* GetNearestEnemy();
 	void RotateToEnemy();
 
@@ -82,10 +79,21 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void TakeDown();
 
+	// 메시 슬라이스
+	UFUNCTION()
+	void OnKatanaBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()	// 메시 슬라이스 실행
+	void OnKatanaEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UPROPERTY(EditDefaultsOnly)
+	UMaterial* MatForSlicedSection;
+
 private:
 	// 무브셋
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	TArray<class UAnimMontage*> Attacks;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
+	TArray<class UAnimMontage*> JumpAttacks;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | TakeDowns")
 	TArray<UAnimMontage*> TakeDowns;
@@ -103,15 +111,14 @@ private:
 	TArray<UAnimMontage*> HitReactions;
 
 	// 캐릭터 상태
-	bool bIsTargeting = false;
 	bool bIsAttacking = false;
 	bool bIsBlocking = false;
 	bool bIsDashing = false;
 
 	// 카메라
-	bool bEnableCameraHightlight = false;	// 카메라 연출 발동시키고 싶을 때 true
+	bool bIsTargeting = false;
 
-	// 무기 (0: 카타나, 1: ????, )
+	// 무기 데이터 (0: 카타나)
 	int WeaponIndex = 0;
 
 	// 공격 콤보 카운트

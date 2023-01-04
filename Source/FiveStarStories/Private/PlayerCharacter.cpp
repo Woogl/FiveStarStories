@@ -13,9 +13,10 @@
 #include <Kismet/KismetMathLibrary.h>
 #include "PlayerAnimInstance.h"
 #include <Math/UnrealMathUtility.h>
-//#include "MotionWarpingComponent.h"
-// TEST CODE
+// Test code headers
 #include "Dummy.h"	
+#include "ProceduralMeshComponent.h"
+#include "KismetProceduralMeshLibrary.h"
 
 
 // Sets default values
@@ -41,7 +42,7 @@ APlayerCharacter::APlayerCharacter()
 	{
 		Katana->SetStaticMesh(katanaAsset.Object);
 		Katana->SetupAttachment(GetMesh(), TEXT("katana3"));
-		Katana->SetCollisionProfileName(TEXT("NoCollision"));
+		Katana->SetCollisionProfileName(TEXT("Blade"));
 	}
 
 	// 칼집
@@ -79,9 +80,6 @@ APlayerCharacter::APlayerCharacter()
 
 	// 공격 판정을 관리하는 컴포넌트
 	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
-
-	// 테이크다운 시 위치 조정하는 컴포넌트
-	//MotionWarpComp = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarpComp"));
 }
 
 void APlayerCharacter::BeginPlay()
@@ -93,6 +91,10 @@ void APlayerCharacter::BeginPlay()
 
 	// 기본 무기 최대 콤보 수 설정
 	MaxAttackCount = Attacks.Num() - 1;
+
+	// 델리게이트 바인딩
+	Katana->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnKatanaBeginOverlap);
+	Katana->OnComponentEndOverlap.AddDynamic(this, &APlayerCharacter::OnKatanaEndOverlap);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -100,7 +102,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 타겟팅한 적 있으면 Yaw 회전
-	if (bIsTargeting)
+	if (bIsTargeting == true)
 	{
 		RotateToEnemy();
 		// 거리가 멀어지면 타겟 해제
@@ -298,8 +300,7 @@ bool APlayerCharacter::CanDash()
 
 void APlayerCharacter::PerformLightAttack()
 {
-	// 공격 몽타주 실행
-	UKismetSystemLibrary::PrintString(this, TEXT("Attack Count : ") + FString::FromInt(AttackCount));
+	// 몽타주 재생
 	PlayAnimMontage(Attacks[AttackCount]);
 
 	// 콤보 카운트
@@ -320,7 +321,10 @@ void APlayerCharacter::PerformDashAttack()
 
 void APlayerCharacter::PerformJumpAttack()
 {
+	bIsAttacking = true;
 
+	// 몽타주 재생
+	PlayAnimMontage(JumpAttacks[0]);
 }
 
 void APlayerCharacter::PerformHeavyAttack()
@@ -413,4 +417,30 @@ void APlayerCharacter::TakeDown()
 	PlayAnimMontage(TakeDowns[0]);
 }
 
+void APlayerCharacter::OnKatanaBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	UKismetSystemLibrary::PrintString(this, TEXT("OnKatanaBeginOverlap"));
+}
+
+void APlayerCharacter::OnKatanaEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	UKismetSystemLibrary::PrintString(this, TEXT("OnKatanaEndOverlap"));
+
+	// 자를 메시
+	UProceduralMeshComponent* meshToSlice = Cast<UProceduralMeshComponent>(OtherComp);
+	FVector planePosition = Katana->GetComponentLocation();
+	FVector planeNormal = Katana->GetUpVector();
+
+	// 잘라진 메시
+	UProceduralMeshComponent* otherHalfMesh;
+
+	if (meshToSlice != nullptr)
+	{
+		// 메시 자르기
+		UKismetProceduralMeshLibrary::SliceProceduralMesh(meshToSlice, planePosition, planeNormal, true, otherHalfMesh, EProcMeshSliceCapOption::CreateNewSectionForCap, MatForSlicedSection);
+		// 잘라진 메시 분리
+		otherHalfMesh->SetSimulatePhysics(true);
+		otherHalfMesh->AddRadialImpulse(planePosition, 1000.f, 500.f, ERadialImpulseFalloff::RIF_Constant, true);
+	}
+}
 
