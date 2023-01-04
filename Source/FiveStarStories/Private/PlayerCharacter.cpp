@@ -12,8 +12,11 @@
 #include <Kismet/KismetSystemLibrary.h>
 #include <Kismet/KismetMathLibrary.h>
 #include "PlayerAnimInstance.h"
+#include <Math/UnrealMathUtility.h>
+//#include "MotionWarpingComponent.h"
 // TEST CODE
 #include "Dummy.h"	
+
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -70,12 +73,15 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
 	GetCharacterMovement()->JumpZVelocity = 400.f;
 	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MaxWalkSpeed = 350.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
-	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 500.f;
 
 	// 공격 판정을 관리하는 컴포넌트
 	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
+
+	// 테이크다운 시 위치 조정하는 컴포넌트
+	//MotionWarpComp = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarpComp"));
 }
 
 void APlayerCharacter::BeginPlay()
@@ -189,18 +195,22 @@ void APlayerCharacter::Attack()
 	// 타겟팅한 적을 향해 Yaw 회전
 	RotateToEnemy();
 
-	// 공격 몽타주 실행
-	UKismetSystemLibrary::PrintString(this, TEXT("Attack Count : ") + FString::FromInt(AttackCount));
-	PlayAnimMontage(Attacks[AttackCount]);
-
-	// 콤보 카운트
-	if (AttackCount < MaxAttackCount)
+	// 공격 분기점
+	if (GetCharacterMovement()->IsFalling() == true)
 	{
-		AttackCount++;
+		PerformJumpAttack();
+	}
+	else if (bIsDashing == true)
+	{
+		PerformDashAttack();
+	}
+	else if (bIsBlocking == true)
+	{
+		PerformHeavyAttack();
 	}
 	else
 	{
-		AttackCount = 0;
+		PerformLightAttack();
 	}
 }
 
@@ -215,6 +225,7 @@ void APlayerCharacter::Guard()
 	// 이동속도 감소
 	GetCharacterMovement()->MaxWalkSpeed = 200.f;
 	GetCharacterMovement()->MaxAcceleration = 512.f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 32.f;
 }
 
 void APlayerCharacter::StopGuard()
@@ -223,8 +234,9 @@ void APlayerCharacter::StopGuard()
 	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	animIns->SetIsBlocking(false);
 	// 이동속도 초기화
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MaxWalkSpeed = 350.f;
 	GetCharacterMovement()->MaxAcceleration = 2048.f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 500.f;
 }
 
 void APlayerCharacter::Interact()
@@ -239,14 +251,14 @@ void APlayerCharacter::Dash()
 
 	bIsDashing = true;
 	// 이동속도 증가
-	GetCharacterMovement()->MaxWalkSpeed = 800.f;
+	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 }
 
 void APlayerCharacter::StopDash()
 {
 	bIsDashing = false;
 	// 이동속도 초기화
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MaxWalkSpeed = 350.f;
 }
 
 bool APlayerCharacter::CanDoJump()
@@ -284,6 +296,38 @@ bool APlayerCharacter::CanDash()
 	return true;
 }
 
+void APlayerCharacter::PerformLightAttack()
+{
+	// 공격 몽타주 실행
+	UKismetSystemLibrary::PrintString(this, TEXT("Attack Count : ") + FString::FromInt(AttackCount));
+	PlayAnimMontage(Attacks[AttackCount]);
+
+	// 콤보 카운트
+	if (AttackCount < MaxAttackCount)
+	{
+		AttackCount++;
+	}
+	else
+	{
+		AttackCount = 0;
+	}
+}
+
+void APlayerCharacter::PerformDashAttack()
+{
+
+}
+
+void APlayerCharacter::PerformJumpAttack()
+{
+
+}
+
+void APlayerCharacter::PerformHeavyAttack()
+{
+
+}
+
 void APlayerCharacter::TryAutoTargeting()
 {
 	AActor* target = GetNearestEnemy();
@@ -318,7 +362,7 @@ AActor* APlayerCharacter::GetNearestEnemy()
 	TArray< AActor* > actorsToIgnore;
 
 	UKismetSystemLibrary::SphereTraceMultiForObjects(this, start, end, radius, objectTypes, false, actorsToIgnore,
-		EDrawDebugTrace::ForDuration, hits, true);
+		EDrawDebugTrace::None, hits, true);
 
 	// 반환할 액터를 담을 변수
 	AActor* nearestEnemy = nullptr;
@@ -338,10 +382,11 @@ AActor* APlayerCharacter::GetNearestEnemy()
 				lastDistanceToEnemy = distanceToEnemy;
 				nearestEnemy = hit.GetActor();	// 더 가까우면 nearestEnemy 갱신
 				// 디버그
-				UKismetSystemLibrary::PrintString(this, TEXT("Auto Target : ") + nearestEnemy->GetName());
+				UKismetSystemLibrary::PrintString(this, TEXT("Nearest Target : ") + nearestEnemy->GetName());
 			}
 		}
 	}
+
 	// 찾은 액터를 반환. 못찾았으면 nullptr 그대로 반환함
 	return nearestEnemy;
 }
@@ -362,7 +407,10 @@ void APlayerCharacter::RotateToEnemy()
 
 void APlayerCharacter::TakeDown()
 {
-	GetNearestEnemy();
+	// GetNearestEnemy();
+	// TODO: 적이 테이크다운 가능한 상태인지 체크
 
-	// TODO: 적이 테이크다운 가능한 상태인지 확인하고 테이크다운
+	PlayAnimMontage(TakeDowns[0]);
 }
+
+

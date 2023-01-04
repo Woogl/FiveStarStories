@@ -25,6 +25,7 @@ public:
 
 	void PerformHitReaction();
 
+	UFUNCTION(BlueprintCallable)
 	void PerformTakeDownReaction();
 
 private:

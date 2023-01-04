@@ -38,6 +38,10 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
 	class UCombatComponent* CombatComp;
 
+	// 테이크다운 시 위치 조정하는 컴포넌트
+	//UPROPERTY(VisibleAnywhere, Category = "Combat")
+	//class UMotionWarpingComponent* MotionWarpComp;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -63,12 +67,19 @@ protected:
 	bool CanInteract();
 	bool CanDash();
 	
+	// 공격 실행
+	void PerformLightAttack();
+	void PerformDashAttack();
+	void PerformJumpAttack();
+	void PerformHeavyAttack();
+
 	// 오토 타게팅 
 	void TryAutoTargeting();
 	AActor* GetNearestEnemy();
 	void RotateToEnemy();
 
 	// 테이크다운
+	UFUNCTION(BlueprintCallable)
 	void TakeDown();
 
 private:
@@ -97,16 +108,17 @@ private:
 	bool bIsBlocking = false;
 	bool bIsDashing = false;
 
-	// 공격 콤보 카운트
-	UPROPERTY()
-	int AttackCount = 0;
+	// 카메라
+	bool bEnableCameraHightlight = false;	// 카메라 연출 발동시키고 싶을 때 true
 
-	// 최대 공격 콤보 카운트
-	UPROPERTY(VisibleAnywhere, Category = "Combat")
+	// 무기 (0: 카타나, 1: ????, )
+	int WeaponIndex = 0;
+
+	// 공격 콤보 카운트
+	int AttackCount = 0;
 	int MaxAttackCount;
 
 	// 오토 타게팅 대상
-	UPROPERTY()
 	AActor* EnemyTarget = nullptr;
 
 public:
