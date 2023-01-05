@@ -12,7 +12,19 @@ class FIVESTARSTORIES_API ASliceableActor : public AActor
 	GENERATED_BODY()
 	
 public:	
+<<<<<<< Updated upstream:Source/FiveStarStories/Public/SliceableActor.h
 	ASliceableActor();
+=======
+	ASliceableActorBase();
+
+	// 잘릴 때 생성되는 메시(복사본)의 원본으로만 쓰이는 메시
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* OriginalMesh;
+
+	// 실제로 게임에 등장하는 복사본
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UProceduralMeshComponent* ProceduralMesh;
+>>>>>>> Stashed changes:Source/FiveStarStories/Public/SliceableActorBase.h
 
 protected:
 	virtual void BeginPlay() override;

@@ -11,10 +11,10 @@ class FIVESTARSTORIES_API APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
@@ -78,6 +78,7 @@ protected:
 	// 테이크다운
 	UFUNCTION(BlueprintCallable)
 	void TakeDown();
+<<<<<<< Updated upstream
 
 	// 메시 슬라이스
 	UFUNCTION()
@@ -86,6 +87,10 @@ protected:
 	void OnKatanaEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	UPROPERTY(EditDefaultsOnly)
 	UMaterial* MatForSlicedSection;
+=======
+	UFUNCTION(BlueprintCallable)
+	void SpawnMeshSlicer();
+>>>>>>> Stashed changes
 
 private:
 	// 무브셋

@@ -15,8 +15,7 @@
 #include <Math/UnrealMathUtility.h>
 // Test code headers
 #include "Dummy.h"	
-#include "ProceduralMeshComponent.h"
-#include "KismetProceduralMeshLibrary.h"
+#include "MeshSlicer.h"
 
 
 // Sets default values
@@ -42,7 +41,7 @@ APlayerCharacter::APlayerCharacter()
 	{
 		Katana->SetStaticMesh(katanaAsset.Object);
 		Katana->SetupAttachment(GetMesh(), TEXT("katana3"));
-		Katana->SetCollisionProfileName(TEXT("Blade"));
+		Katana->SetCollisionProfileName(TEXT("NoCollision"));
 	}
 
 	// 칼집
@@ -91,10 +90,6 @@ void APlayerCharacter::BeginPlay()
 
 	// 기본 무기 최대 콤보 수 설정
 	MaxAttackCount = Attacks.Num() - 1;
-
-	// 델리게이트 바인딩
-	Katana->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnKatanaBeginOverlap);
-	Katana->OnComponentEndOverlap.AddDynamic(this, &APlayerCharacter::OnKatanaEndOverlap);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -221,9 +216,13 @@ void APlayerCharacter::Guard()
 	// 방어 가능한 상태인지 체크
 	if (CanGuard() == false) return;
 
+	// 상태 변수 변경
 	bIsBlocking = true;
+
+	// ABP의 상태 변수 변경
 	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	animIns->SetIsBlocking(true);
+
 	// 이동속도 감소
 	GetCharacterMovement()->MaxWalkSpeed = 200.f;
 	GetCharacterMovement()->MaxAcceleration = 512.f;
@@ -232,9 +231,13 @@ void APlayerCharacter::Guard()
 
 void APlayerCharacter::StopGuard()
 {
+	// 상태 변수 변경
 	bIsBlocking = false;
+
+	// ABP의 상태 변수 변경
 	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	animIns->SetIsBlocking(false);
+
 	// 이동속도 초기화
 	GetCharacterMovement()->MaxWalkSpeed = 350.f;
 	GetCharacterMovement()->MaxAcceleration = 2048.f;
@@ -417,6 +420,7 @@ void APlayerCharacter::TakeDown()
 	PlayAnimMontage(TakeDowns[0]);
 }
 
+<<<<<<< Updated upstream
 void APlayerCharacter::OnKatanaBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UKismetSystemLibrary::PrintString(this, TEXT("OnKatanaBeginOverlap"));
@@ -444,3 +448,12 @@ void APlayerCharacter::OnKatanaEndOverlap(UPrimitiveComponent* OverlappedComp, A
 	}
 }
 
+=======
+
+void APlayerCharacter::SpawnMeshSlicer()
+{
+	FTransform transform = Katana->GetComponentTransform();
+	FActorSpawnParameters spawnParams;
+	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), transform, spawnParams);
+}
+>>>>>>> Stashed changes
