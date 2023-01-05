@@ -1,4 +1,3 @@
 # FiveStarStories
  
-# ERROR
-Inherited component details not showimg in blueprint
+# Inherited component details not showimg in blueprint
