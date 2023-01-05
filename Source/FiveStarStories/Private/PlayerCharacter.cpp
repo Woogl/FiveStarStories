@@ -414,46 +414,13 @@ void APlayerCharacter::RotateToEnemy()
 
 void APlayerCharacter::TakeDown()
 {
-	// GetNearestEnemy();
-	// TODO: 적이 테이크다운 가능한 상태인지 체크
-
 	PlayAnimMontage(TakeDowns[0]);
 }
 
-<<<<<<< Updated upstream
-void APlayerCharacter::OnKatanaBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	UKismetSystemLibrary::PrintString(this, TEXT("OnKatanaBeginOverlap"));
-}
-
-void APlayerCharacter::OnKatanaEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	UKismetSystemLibrary::PrintString(this, TEXT("OnKatanaEndOverlap"));
-
-	// 자를 메시
-	UProceduralMeshComponent* meshToSlice = Cast<UProceduralMeshComponent>(OtherComp);
-	FVector planePosition = Katana->GetComponentLocation();
-	FVector planeNormal = Katana->GetUpVector();
-
-	// 잘라진 메시
-	UProceduralMeshComponent* otherHalfMesh;
-
-	if (meshToSlice != nullptr)
-	{
-		// 메시 자르기
-		UKismetProceduralMeshLibrary::SliceProceduralMesh(meshToSlice, planePosition, planeNormal, true, otherHalfMesh, EProcMeshSliceCapOption::CreateNewSectionForCap, MatForSlicedSection);
-		// 잘라진 메시 분리
-		otherHalfMesh->SetSimulatePhysics(true);
-		otherHalfMesh->AddRadialImpulse(planePosition, 1000.f, 500.f, ERadialImpulseFalloff::RIF_Constant, true);
-	}
-}
-
-=======
-
 void APlayerCharacter::SpawnMeshSlicer()
 {
-	FTransform transform = Katana->GetComponentTransform();
 	FActorSpawnParameters spawnParams;
-	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), transform, spawnParams);
+	FTransform spawnTransform = Katana->GetComponentTransform();
+	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), spawnTransform, spawnParams);
 }
->>>>>>> Stashed changes
+

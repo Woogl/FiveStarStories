@@ -12,7 +12,7 @@ AMeshSlicer::AMeshSlicer()
 	PrimaryActorTick.bCanEverTick = true;
 
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
-	Box->SetCollisionProfileName(TEXT("Blade"));
+	Box->SetCollisionProfileName(TEXT("SliceQuery"));
 	Box->SetBoxExtent(FVector(10.f, 45.f, 10.f));
 	RootComponent = Box;
 
@@ -69,7 +69,8 @@ void AMeshSlicer::SliceMesh(UPrimitiveComponent* TargetMesh)
 		}
 		// 잘라진 메시 분리
 		otherHalfMesh->SetSimulatePhysics(true);
-		otherHalfMesh->AddRadialImpulse(planePosition, 1000.f, 500.f, ERadialImpulseFalloff::RIF_Constant, true);
+		otherHalfMesh->AddRadialImpulse(planePosition, 1000.f, 800.f, ERadialImpulseFalloff::RIF_Constant, true);
+		meshToSlice->AddRadialImpulse(planePosition, 1000.f, 800.f, ERadialImpulseFalloff::RIF_Constant, true);
 	}
 }
 

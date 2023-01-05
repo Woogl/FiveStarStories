@@ -78,19 +78,8 @@ protected:
 	// 테이크다운
 	UFUNCTION(BlueprintCallable)
 	void TakeDown();
-<<<<<<< Updated upstream
-
-	// 메시 슬라이스
-	UFUNCTION()
-	void OnKatanaBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()	// 메시 슬라이스 실행
-	void OnKatanaEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	UPROPERTY(EditDefaultsOnly)
-	UMaterial* MatForSlicedSection;
-=======
 	UFUNCTION(BlueprintCallable)
 	void SpawnMeshSlicer();
->>>>>>> Stashed changes
 
 private:
 	// 무브셋
