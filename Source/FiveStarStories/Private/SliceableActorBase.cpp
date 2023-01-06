@@ -19,16 +19,14 @@ ASliceableActorBase::ASliceableActorBase()
 	ProceduralMesh->SetSimulatePhysics(true);
 	ProceduralMesh->SetCollisionProfileName(TEXT("Destructible"));
 	ProceduralMesh->SetupAttachment(RootComponent);
-
-	// OriginalMesh를 복사하여 절차적으로 MeshComponent를 생성
-	// * 이 함수가 잘 작동하지 않아 BP 생성자에서 다시 호출해야함
-	//UKismetProceduralMeshLibrary::CopyProceduralMeshFromStaticMeshComponent(OriginalMesh, 0, ProceduralMesh, true);
 }
 
 void ASliceableActorBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// OriginalMesh를 복사하여 ProceduralMesh에 보관
+	UKismetProceduralMeshLibrary::CopyProceduralMeshFromStaticMeshComponent(OriginalMesh, 0, ProceduralMesh, true);
 }
 
 void ASliceableActorBase::Tick(float DeltaTime)
