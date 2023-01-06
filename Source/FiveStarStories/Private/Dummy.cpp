@@ -2,11 +2,11 @@
 
 
 #include "Dummy.h"
+#include <Components/CapsuleComponent.h>
 #include <Kismet/GameplayStatics.h>
 #include <Kismet/KismetMathLibrary.h>
 // Test Code
 #include <Kismet/KismetSystemLibrary.h>
-#include "EBodyPartIndex.h"
 
 
 ADummy::ADummy()
@@ -25,7 +25,7 @@ ADummy::ADummy()
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, -90.f, 0.f));
 	}
 	*/
-
+	
 	// 잘려진 신체 파트
 	Head = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Head"));
 	Head->SetCollisionProfileName(TEXT("NoCollision"));
@@ -106,37 +106,47 @@ void ADummy::PerformTakeDownReaction()
 	PlayAnimMontage(TakeDownReactions[0]);
 }
 
-void ADummy::SliceBodyPart(USkeletalMeshComponent* BodyPart, FVector Impulse)
+void ADummy::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse)
 {
 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("SliceBodyPart"));
 
 	// 절단할 부위 설정
-	if (BodyPart == Head)
+	USkeletalMeshComponent* bodyPart = nullptr;
+	if (BodyIndex == EBodyPart::EBP_Head)
 	{
+		bodyPart = Head;
 		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("head"));
 		GetMesh()->HideBoneByName(FName("head"), PBO_None);
-		GetMesh()->SetPhysicsAsset(NoHead);
+		GetMesh()->SetPhysicsAsset(NoHead);	// 애니메이션 재생 중에 PhysicsAsset 바꾸니까 크래시 뜨는건가? NoBody 경로는 C++에서 모르구나!
 	}
-	else if (BodyPart == LeftArm)
+	else if (BodyIndex == EBodyPart::EBP_LeftArm)
 	{
+		bodyPart = LeftArm;
 		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("upperarm_l"));
 		GetMesh()->HideBoneByName(FName("upperarm_l"), PBO_None);
 		GetMesh()->SetPhysicsAsset(NoLeftArm);
 	}
-	else if (BodyPart == RightArm)
+	else if (BodyIndex == EBodyPart::EBP_RightArm)
 	{
+		bodyPart = RightArm;
 		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("upperarm_r"));
 		GetMesh()->HideBoneByName(FName("upperarm_r"), PBO_None);
 		GetMesh()->SetPhysicsAsset(NoRightArm);
 	}
-	else if (BodyPart == LeftLeg)
+	else if (BodyIndex == EBodyPart::EBP_Waist)
 	{
+		// TO DO: 허리 자르기
+	}
+	else if (BodyIndex == EBodyPart::EBP_LeftLeg)
+	{
+		bodyPart = LeftLeg;
 		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("thigh_l"));
 		GetMesh()->HideBoneByName(FName("thigh_l"), PBO_None);
 		GetMesh()->SetPhysicsAsset(NoLeftLeg);
 	}
-	else if (BodyPart == RightLeg)
+	else if (BodyIndex == EBodyPart::EBP_RightLeg)
 	{
+		bodyPart = RightLeg;
 		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("thigh_r"));
 		GetMesh()->HideBoneByName(FName("thigh_r"), PBO_None);
 		GetMesh()->SetPhysicsAsset(NoRightLeg);
@@ -147,13 +157,13 @@ void ADummy::SliceBodyPart(USkeletalMeshComponent* BodyPart, FVector Impulse)
 	}
 
 	// 절단된 부위 설정
-	BodyPart->bHiddenInGame = false;
-	BodyPart->SetMasterPoseComponent(NULL);
+	bodyPart->bHiddenInGame = false;
+	bodyPart->SetMasterPoseComponent(NULL);
 
 	// 절단된 부위 날리기
-	BodyPart->SetCollisionProfileName(TEXT("Ragdoll"));
-	BodyPart->SetSimulatePhysics(true);
-	BodyPart->AddImpulse(Impulse, NAME_None, true);
+	bodyPart->SetCollisionProfileName(TEXT("Ragdoll"));
+	bodyPart->SetSimulatePhysics(true);
+	bodyPart->AddImpulse(Impulse, NAME_None, true);
 
 	// 캡슐 콜리전 변경
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Ragdoll"));

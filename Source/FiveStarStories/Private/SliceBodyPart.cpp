@@ -6,10 +6,10 @@
 // Test Code
 
 
-bool USliceBodyPart::Received_Notify(class USkeletalMeshComponent* MeshComp, class UAnimSequence* AnimSeq) const
+void USliceBodyPart::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	auto dummy = Cast<ADummy>(MeshComp->GetOwner());
-	dummy->SliceBodyPart(BodyPart, Impulse);
-	
-	return true;
+	ADummy* dummy = Cast<ADummy>(MeshComp->GetOwner());
+
+	// 신체 자르는 함수
+	dummy->SliceBodyPart(BodyIndex, Impulse);
 }

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include <Components/CapsuleComponent.h>
+#include "EBodyPart.h"
 #include "Dummy.generated.h"
 
 UCLASS()
@@ -66,7 +66,7 @@ public:
 
 	// 신체 절단
 	UFUNCTION(BlueprintCallable)
-	void SliceBodyPart(USkeletalMeshComponent* BodyPart, FVector Impulse);
+	void SliceBodyPart(EBodyPart BodyIndex, FVector Impulse);
 
 	// 래그돌 활성화
 	UFUNCTION(BlueprintCallable)
