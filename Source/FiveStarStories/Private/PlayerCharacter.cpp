@@ -27,7 +27,7 @@ APlayerCharacter::APlayerCharacter()
 	GetCapsuleComponent()->InitCapsuleSize(40.f, 90.0f);
 
 	// ½ºÄÌ·¹Å» ¸Þ½¬
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> meshAsset(TEXT("SkeletalMesh'/Game/MarketplaceAssets/ARPG_Samurai/Demo/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> meshAsset(TEXT("SkeletalMesh'/Game/MarketplaceAssets/ARPG_Samurai/Demo/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"));
 	if (meshAsset.Succeeded())
 	{
 		GetMesh()->SetSkeletalMesh(meshAsset.Object);
@@ -36,7 +36,7 @@ APlayerCharacter::APlayerCharacter()
 
 	// Ä®
 	Katana = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Katana"));
-	ConstructorHelpers::FObjectFinder<UStaticMesh> katanaAsset(TEXT("StaticMesh'/Game/MarketplaceAssets/ARPG_Samurai/Demo/Weapon/Mesh/katana.katana'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> katanaAsset(TEXT("StaticMesh'/Game/MarketplaceAssets/ARPG_Samurai/Demo/Weapon/Mesh/katana.katana'"));
 	if (katanaAsset.Succeeded())
 	{
 		Katana->SetStaticMesh(katanaAsset.Object);

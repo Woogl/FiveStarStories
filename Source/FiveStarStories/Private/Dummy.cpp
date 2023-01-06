@@ -57,7 +57,7 @@ ADummy::ADummy()
 	RightLeg->SetupAttachment(GetMesh());
 	RightLeg->bHiddenInGame = true;
 
-	// 잘려진 후에 교체용 피직스 에셋 
+	// 잘려진 후에 교체용 피직스 에셋
 	NoHead = CreateDefaultSubobject<UPhysicsAsset>(TEXT("NoHead"));
 	NoLeftArm = CreateDefaultSubobject<UPhysicsAsset>(TEXT("NoLeftArm"));
 	NoRightArm = CreateDefaultSubobject<UPhysicsAsset>(TEXT("NoRightArm"));

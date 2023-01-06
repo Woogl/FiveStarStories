@@ -38,6 +38,10 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
 	class UCombatComponent* CombatComp;
 
+	// 타게팅 대상
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Target")
+	AActor* EnemyTarget = nullptr;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -118,9 +122,6 @@ private:
 	// 공격 콤보 카운트
 	int AttackCount = 0;
 	int MaxAttackCount;
-
-	// 오토 타게팅 대상
-	AActor* EnemyTarget = nullptr;
 
 public:
 	/** Returns CameraBoom subobject **/
