@@ -6,6 +6,7 @@
 #include <Kismet/KismetMathLibrary.h>
 // Test Code
 #include <Kismet/KismetSystemLibrary.h>
+#include "EBodyPartIndex.h"
 
 
 ADummy::ADummy()
@@ -15,13 +16,15 @@ ADummy::ADummy()
 	// 캡슐
 	GetCapsuleComponent()->InitCapsuleSize(40.f, 90.0f);
 
+	/* NOTE: 스켈레탈 메쉬는 BP에서 직접 지정
 	// 스켈레탈 메쉬
-	//ConstructorHelpers::FObjectFinder<USkeletalMesh> meshAsset(TEXT("SkeletalMesh'/Game/MarketplaceAssets/ARPG_Samurai/Demo/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"));
-	//if (meshAsset.Succeeded())
-	//{
-	//	GetMesh()->SetSkeletalMesh(meshAsset.Object);
-	//	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, -90.f, 0.f));
-	//}
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> meshAsset(TEXT("SkeletalMesh'/Game/MarketplaceAssets/ARPG_Samurai/Demo/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"));
+	if (meshAsset.Succeeded())
+	{
+		GetMesh()->SetSkeletalMesh(meshAsset.Object);
+		GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, -90.f, 0.f));
+	}
+	*/
 
 	// 잘려진 신체 파트
 	Head = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Head"));
@@ -110,8 +113,8 @@ void ADummy::SliceBodyPart(USkeletalMeshComponent* BodyPart, FVector Impulse)
 	// 절단할 부위 설정
 	if (BodyPart == Head)
 	{
-		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("neck_01"));
-		GetMesh()->HideBoneByName(FName("neck_01"), PBO_None);
+		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("head"));
+		GetMesh()->HideBoneByName(FName("head"), PBO_None);
 		GetMesh()->SetPhysicsAsset(NoHead);
 	}
 	else if (BodyPart == LeftArm)
