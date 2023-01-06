@@ -13,22 +13,22 @@ AMeshSlicer::AMeshSlicer()
 
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	Box->SetCollisionProfileName(TEXT("SliceQuery"));
-	Box->SetBoxExtent(FVector(10.f, 45.f, 10.f));
+	Box->SetBoxExtent(FVector(60.f, 45.f, 0.f));
 	RootComponent = Box;
 
 	// 델리게이트 바인딩
 	Box->OnComponentEndOverlap.AddDynamic(this, &AMeshSlicer::OnBoxEndOverlap);
 
 	// 디버그용
-	Box->bHiddenInGame = false;
+	//Box->bHiddenInGame = false;
 }
 
 void AMeshSlicer::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// 스폰되고 0.1초 지나면 파괴
-	SetLifeSpan(0.1f);
+	// 스폰되고 0.01초 지나면 파괴
+	SetLifeSpan(0.01f);
 }
 
 void AMeshSlicer::Tick(float DeltaTime)
@@ -69,8 +69,8 @@ void AMeshSlicer::SliceMesh(UPrimitiveComponent* TargetMesh)
 		}
 		// 잘라진 메시 분리
 		otherHalfMesh->SetSimulatePhysics(true);
-		otherHalfMesh->AddRadialImpulse(planePosition, 1000.f, 800.f, ERadialImpulseFalloff::RIF_Constant, true);
-		meshToSlice->AddRadialImpulse(planePosition, 1000.f, 800.f, ERadialImpulseFalloff::RIF_Constant, true);
+		otherHalfMesh->AddRadialImpulse(planePosition, 1000.f, 500.f, ERadialImpulseFalloff::RIF_Constant, true);
+		meshToSlice->AddRadialImpulse(planePosition, 1000.f, 500.f, ERadialImpulseFalloff::RIF_Constant, true);
 	}
 }
 

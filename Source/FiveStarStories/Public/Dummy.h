@@ -11,7 +11,40 @@ UCLASS()
 class FIVESTARSTORIES_API ADummy : public ACharacter
 {
 	GENERATED_BODY()
-		
+	
+public:
+	// 잘려진 신체 파트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Body")
+	USkeletalMeshComponent* Head;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Body")
+	USkeletalMeshComponent* LeftArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Body")
+	USkeletalMeshComponent* RightArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Body")
+	USkeletalMeshComponent* LeftLeg;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Body")
+	USkeletalMeshComponent* RightLeg;
+
+	// 잘려진 후에 교체용 피직스 에셋 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Physics Asset")
+	UPhysicsAsset* NoHead;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Physics Asset")
+	UPhysicsAsset* NoLeftArm;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Physics Asset")
+	UPhysicsAsset* NoRightArm;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Physics Asset")
+	UPhysicsAsset* NoLeftLeg;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Physics Asset")
+	UPhysicsAsset* NoRightLeg;
+
 public:
 	ADummy();
 
@@ -26,7 +59,18 @@ public:
 	void PerformHitReaction();
 
 	UFUNCTION(BlueprintCallable)
+	void OnTakeDown();
+
+	UFUNCTION(BlueprintCallable)
 	void PerformTakeDownReaction();
+
+	// 신체 절단
+	UFUNCTION(BlueprintCallable)
+	void SliceBodyPart(USkeletalMeshComponent* BodyPart, FVector Impulse);
+
+	// 래그돌 활성화
+	UFUNCTION(BlueprintCallable)
+	void ActivateRagdoll();
 
 private:
 	// 무브셋
@@ -35,4 +79,5 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | TakeDownReactions")
 	TArray<UAnimMontage*> TakeDownReactions;
+
 };
