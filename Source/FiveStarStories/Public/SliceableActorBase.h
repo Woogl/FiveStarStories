@@ -14,7 +14,7 @@ class FIVESTARSTORIES_API ASliceableActorBase : public AActor
 public:	
 	ASliceableActorBase();
 
-	// 잘릴 때 생성되는 메시(복사본)의 원본으로만 쓰이는 메시
+	// 잘릴 때 생성되는 메시(복사본)의 원본으로만 쓰이는 메시. (주의: Allow CPU Access = true인 것만 사용할 것)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* OriginalMesh;
 
@@ -23,7 +23,7 @@ public:
 	class UProceduralMeshComponent* ProceduralMesh;
 
 	// (선택사항) 단면에 덮어씌울 머터리얼
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere, Category = "Option")
 	UMaterial* SectionMaterial = nullptr;
 
 protected:

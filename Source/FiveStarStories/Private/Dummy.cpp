@@ -11,6 +11,11 @@ ADummy::ADummy()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	// 플레이어의 스프링암에 걸리지 않게
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	// 오토 타게팅할 때 대상으로 걸리지 않게
+	GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 }
 
 void ADummy::BeginPlay()
@@ -25,7 +30,7 @@ void ADummy::Tick(float DeltaTime)
 
 }
 
-// 질문 : 적이니까 이거 지워도 되나?
+// 질문 : 적한테는 이 함수가 필요없을거 같은데 지워도 되나?
 void ADummy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -96,13 +101,22 @@ void ADummy::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDe
 	}
 
 	// 시간 지나면 Ragdoll 활성화
-	GetWorldTimerManager().SetTimer(RagdollTimer, this, &ADummy::ActivateRagdoll, RagdollDelay, false);
+	if (RagdollDelay <= 0.f)
+	{
+		ActivateRagdoll();
+	}
+	else
+	{
+		GetWorldTimerManager().SetTimer(RagdollTimer, this, &ADummy::ActivateRagdoll, RagdollDelay, false);
+	}
+
 }
 
 void ADummy::ActivateRagdoll()
 {
 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ActivateRagdoll"));
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 	GetMesh()->SetSimulatePhysics(true);
 }

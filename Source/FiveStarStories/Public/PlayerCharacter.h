@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "ECameraPosition.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -12,7 +13,13 @@ class FIVESTARSTORIES_API APlayerCharacter : public ACharacter
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
+	class USpringArmComponent* DefaultCameraBoom;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	USpringArmComponent* LeftCameraBoom;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	USpringArmComponent* RightCameraBoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
@@ -85,6 +92,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SpawnMeshSlicer();
 
+	// 카메라 전환
+	UFUNCTION(BlueprintCallable)
+	void MoveCamera(ECameraPosition CameraPosition);
+
 private:
 	// 무브셋
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
@@ -125,7 +136,7 @@ private:
 
 public:
 	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return DefaultCameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 

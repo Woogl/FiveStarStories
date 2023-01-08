@@ -46,17 +46,31 @@ APlayerCharacter::APlayerCharacter()
 	Scabbard->SetupAttachment(GetMesh(), TEXT("scabbard1"));
 	Scabbard->SetCollisionProfileName(TEXT("NoCollision"));
 
-	// 스프링암
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f;
-	CameraBoom->bUsePawnControlRotation = true;
-	CameraBoom->bEnableCameraLag = true;	// 카메라 랙 활성화
-	CameraBoom->CameraLagSpeed = 10.f;
+	// 기본 스프링암
+	DefaultCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("DefaultCameraBoom"));
+	DefaultCameraBoom->SetupAttachment(RootComponent);
+	DefaultCameraBoom->TargetArmLength = 300.0f;
+	DefaultCameraBoom->bUsePawnControlRotation = true;
+	DefaultCameraBoom->bEnableCameraLag = true;	// 카메라 랙 활성화
+	DefaultCameraBoom->CameraLagSpeed = 10.f;
+
+	// 좌측 사이드뷰 스프링암
+	LeftCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("LeftCameraBoom"));
+	LeftCameraBoom->SetupAttachment(RootComponent);
+	LeftCameraBoom->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	LeftCameraBoom->TargetArmLength = 225.f;
+	LeftCameraBoom->TargetOffset = FVector(-80.f, 0.f, 0.f);
+
+	// 우측 사이드뷰 스프링암
+	RightCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("RightCameraBoom"));
+	RightCameraBoom->SetupAttachment(RootComponent);
+	RightCameraBoom->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+	RightCameraBoom->TargetArmLength = 225.f;
+	RightCameraBoom->TargetOffset = FVector(-80.f, 0.f, 0.f);
 
 	// 카메라
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	FollowCamera->SetupAttachment(DefaultCameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
 	// 회전 설정
@@ -419,5 +433,25 @@ void APlayerCharacter::SpawnMeshSlicer()
 	FActorSpawnParameters spawnParams;
 	FTransform spawnTransform = Katana->GetComponentTransform();
 	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), spawnTransform, spawnParams);
+}
+
+void APlayerCharacter::MoveCamera(ECameraPosition CameraPosition)
+{
+	if (CameraPosition == ECameraPosition::ECP_Default)
+	{
+		FollowCamera->AttachToComponent(DefaultCameraBoom, FAttachmentTransformRules::KeepWorldTransform);
+	}
+	else if (CameraPosition == ECameraPosition::ECP_LeftSideView)
+	{
+		FollowCamera->AttachToComponent(LeftCameraBoom, FAttachmentTransformRules::KeepWorldTransform);
+	}
+	else if (CameraPosition == ECameraPosition::ECP_RightSideView)
+	{
+		FollowCamera->AttachToComponent(RightCameraBoom, FAttachmentTransformRules::KeepWorldTransform);
+	}
+
+	FLatentActionInfo info;
+	info.CallbackTarget = this;
+	UKismetSystemLibrary::MoveComponentTo(FollowCamera, FVector(0.f), FRotator(0.f), false, false, 0.4f, true, EMoveComponentAction::Move, info);
 }
 
