@@ -81,7 +81,7 @@ protected:
 
 	// 테이크다운
 	UFUNCTION(BlueprintCallable)
-	void TakeDown();
+	void ExecuteEnemy();
 	UFUNCTION(BlueprintCallable)
 	void SpawnMeshSlicer();
 
@@ -93,8 +93,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	TArray<class UAnimMontage*> JumpAttacks;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | TakeDowns")
-	TArray<UAnimMontage*> TakeDowns;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Executions")
+	TArray<UAnimMontage*> Executions;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	TArray<UAnimMontage*> GuardHits;

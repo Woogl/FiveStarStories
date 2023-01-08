@@ -412,9 +412,9 @@ void APlayerCharacter::RotateToEnemy()
 	}
 }
 
-void APlayerCharacter::TakeDown()
+void APlayerCharacter::ExecuteEnemy()
 {
-	PlayAnimMontage(TakeDowns[0]);
+	PlayAnimMontage(Executions[0]);
 }
 
 void APlayerCharacter::SpawnMeshSlicer()
