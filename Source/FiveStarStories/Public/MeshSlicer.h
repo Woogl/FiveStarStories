@@ -23,15 +23,15 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	// 절단면 머터리얼 (선택사항. AnimNotify에서도 지정 가능)
-	UPROPERTY(EditAnywhere)
-	UMaterial* MatForSlicedSection;
-
 	UFUNCTION()
 	void OnBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	// 메시 슬라이스
 	UFUNCTION(BlueprintCallable)
 	void SliceMesh(UPrimitiveComponent* TargetMesh);
+
+	// 단면에 씌울 머터리얼
+	UPROPERTY()
+	UMaterial* MatForSlicedSection = nullptr;
 
 };

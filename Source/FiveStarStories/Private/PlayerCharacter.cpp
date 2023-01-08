@@ -13,12 +13,9 @@
 #include <Kismet/KismetMathLibrary.h>
 #include "PlayerAnimInstance.h"
 #include <Math/UnrealMathUtility.h>
-// Test code headers
-#include "Dummy.h"	
 #include "MeshSlicer.h"
 
 
-// Sets default values
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;

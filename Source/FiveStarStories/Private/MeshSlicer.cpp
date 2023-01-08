@@ -6,6 +6,7 @@
 #include "ProceduralMeshComponent.h"
 #include "KismetProceduralMeshLibrary.h"
 #include <Kismet/KismetSystemLibrary.h>
+#include "SliceableActorBase.h"
 
 AMeshSlicer::AMeshSlicer()
 {
@@ -13,14 +14,15 @@ AMeshSlicer::AMeshSlicer()
 
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	Box->SetCollisionProfileName(TEXT("SliceQuery"));
-	Box->SetBoxExtent(FVector(60.f, 45.f, 0.f));
+	// 자를 크기 설정
+	Box->SetBoxExtent(FVector(100.f, 45.f, 0.f));
 	RootComponent = Box;
 
 	// 델리게이트 바인딩
 	Box->OnComponentEndOverlap.AddDynamic(this, &AMeshSlicer::OnBoxEndOverlap);
 
 	// 디버그용
-	//Box->bHiddenInGame = false;
+	// Box->bHiddenInGame = false;
 }
 
 void AMeshSlicer::BeginPlay()
@@ -40,6 +42,10 @@ void AMeshSlicer::Tick(float DeltaTime)
 void AMeshSlicer::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	UKismetSystemLibrary::PrintString(this, TEXT("OnBoxEndOverlap"));
+
+	// 단면에 덮어씌울 머터리얼 가져오기
+	auto sliceTarget = Cast<ASliceableActorBase>(OtherActor);
+	MatForSlicedSection = sliceTarget->SectionMaterial;
 
 	SliceMesh(OtherComp);
 }

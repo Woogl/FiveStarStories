@@ -22,10 +22,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UProceduralMeshComponent* ProceduralMesh;
 
+	// (선택사항) 단면에 덮어씌울 머터리얼
+	UPROPERTY(EditDefaultsOnly)
+	UMaterial* SectionMaterial = nullptr;
+
 protected:
 	virtual void BeginPlay() override;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+
 
 };
