@@ -12,7 +12,7 @@ AMeshSlicer::AMeshSlicer()
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	Box->SetCollisionProfileName(TEXT("SliceQuery"));
 	// 자를 크기 설정
-	Box->SetBoxExtent(FVector(100.f, 45.f, 0.f));
+	Box->SetBoxExtent(FVector(15.f, 45.f, 0.f));
 	RootComponent = Box;
 
 	// 델리게이트 바인딩

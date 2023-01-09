@@ -38,20 +38,21 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input")
 	float TurnRateGamepad;
 
 	// 공격 판정을 관리하는 컴포넌트
-	UPROPERTY(VisibleAnywhere, Category = "Combat")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	class UCombatComponent* CombatComp;
 
 	// 타게팅 대상
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Target")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	AActor* EnemyTarget = nullptr;
 
 	// 카메라 전환
-	UFUNCTION(BlueprintCallable)
 	void MoveCamera(ECameraPosition CameraPosition);
+	// 스태틱 메시 자르는 액터 스폰
+	void SpawnMeshSlicer();
 
 protected:
 	virtual void BeginPlay() override;
@@ -93,8 +94,6 @@ protected:
 	// 테이크다운
 	UFUNCTION(BlueprintCallable)
 	void ExecuteEnemy();
-	UFUNCTION(BlueprintCallable)
-	void SpawnMeshSlicer();
 
 private:
 	// 무브셋

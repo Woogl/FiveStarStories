@@ -4,6 +4,8 @@
 #include "CombatComponent.h"
 #include <Components/StaticMeshComponent.h>
 #include <Kismet/KismetSystemLibrary.h>
+#include "PlayerCharacter.h"
+#include <Kismet/GameplayStatics.h>
 
 UCombatComponent::UCombatComponent()
 {
@@ -12,7 +14,6 @@ UCombatComponent::UCombatComponent()
 }
 
 
-// Called when the game starts
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -20,7 +21,6 @@ void UCombatComponent::BeginPlay()
 }
 
 
-// Called every frame
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -32,7 +32,14 @@ void UCombatComponent::SetMainWeapon(UStaticMeshComponent* WeaponMesh)
 	MainWeapon = WeaponMesh;
 }
 
-void UCombatComponent::DetectWeaponCollision(float WeaponThickness, FName InStartSocketName /*= TEXT("WeaponStart")*/, FName InEndSocketName /*= TEXT("WeaponEnd")*/)
+
+void UCombatComponent::AttackCheckBegin()
+{
+	// 다시 때릴 수 있도록 초기화
+	AlreadyHitActors.Empty();
+}
+
+void UCombatComponent::AttackCheck(float InWeaponThickness, FName InStartSocketName, FName InEndSocketName)
 {
 	// 트레이스 결과를 저장
 	TArray<FHitResult> hits;
@@ -54,28 +61,44 @@ void UCombatComponent::DetectWeaponCollision(float WeaponThickness, FName InStar
 
 	for (auto hit : hits)
 	{
+		auto hitActor = hit.GetActor();
 		// 이미 맞은 적들이 아닌지 체크
-		if (hit.GetActor() && !AlreadyHitActors.Contains(hit.GetActor()))
+		if (hitActor && !AlreadyHitActors.Contains(hitActor))
 		{
 			// 새로 맞은 적이면 이미 맞은 적들에 추가
-			AlreadyHitActors.Add(hit.GetActor());
-			
-			/* 적이면 Hit Reaction 실행
-			if (hit.GetActor()->IsA(ADummy::StaticClass()))
-			{
-				Cast<ADummy>(hit.GetActor())->PerformHitReaction();
-				UE_LOG(LogTemp, Warning, TEXT("Hit"));
-			}
-			*/
+			AlreadyHitActors.Add(hitActor);
 
-			// TODO: Destructible이면 PerformSliceMesh()
+			// 데미지 가하기
+			//DealDamage(hitActor);
+			
+			// ECC_Destructible이면 Mesh Slicer 스폰
+			if (hit.Component->GetCollisionObjectType() == ECC_Destructible)
+			{
+				auto player = Cast<APlayerCharacter>(GetOwner());
+				player->SpawnMeshSlicer();
+			}
+			
+			// TODO : 데미지 가하기
 		}
 	}
 }
 
-void UCombatComponent::ResetWeaponCollision()
+void UCombatComponent::AttackCheckEnd()
 {
 	// 다시 때릴 수 있도록 초기화
 	AlreadyHitActors.Empty();
+}
+
+void UCombatComponent::DealDamage(AActor* TargetEnemy, float BaseDamage, TSubclassOf<UDamageType> DamageType)
+{
+	// 디버그
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("DealDamage"));
+
+	FVector hitFromDirection = GetOwner()->GetActorLocation();
+	FHitResult info;
+	AController* instigator = GetOwner()->GetInstigatorController();
+	AActor* damageCauser = GetOwner();
+	
+	UGameplayStatics::ApplyPointDamage(TargetEnemy, BaseDamage, hitFromDirection, info, instigator, damageCauser, DamageType);
 }
 

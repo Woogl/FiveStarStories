@@ -24,8 +24,7 @@ public:
 	UFUNCTION()
 	void OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	// 메시 슬라이스
-	UFUNCTION(BlueprintCallable)
+	// 메시 자르기
 	void SliceMesh(UPrimitiveComponent* TargetMesh);
 
 	// 단면에 씌울 머터리얼

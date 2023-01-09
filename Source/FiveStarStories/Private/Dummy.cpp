@@ -46,6 +46,16 @@ void ADummy::LookAtPlayer()
 	SetActorRotation(newRotator);
 }
 
+float ADummy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	hp = hp - DamageAmount;
+
+	// 디버그
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%f"), hp));
+
+	return hp;
+}
+
 void ADummy::PerformHitReaction()
 {
 	PlayAnimMontage(HitReactions[0]);
@@ -99,7 +109,6 @@ void ADummy::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDe
 	{
 		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Invalid Body Part !!!"));
 	}
-
 	// 시간 지나면 Ragdoll 활성화
 	if (RagdollDelay <= 0.f)
 	{
@@ -114,12 +123,19 @@ void ADummy::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDe
 
 void ADummy::ActivateRagdoll()
 {
+	// 디버그
 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ActivateRagdoll"));
+
+	// 캡슐 콜리전 변경
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Ragdoll"));
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
+
+	// 메시 콜리전 변경
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+
+	// 래그돌 활성화
 	GetMesh()->SetSimulatePhysics(true);
 }
 

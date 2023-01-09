@@ -30,6 +30,9 @@ public:
 	// 플레이어 쳐다보기
 	void LookAtPlayer();
 
+	// 데미지 받기
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 	// 맞는 애니메이션 재생
 	void PerformHitReaction();
 
@@ -55,4 +58,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Executed Reactions")
 	TArray<UAnimMontage*> ExecutedReactions;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float hp = 100.f;
 };
