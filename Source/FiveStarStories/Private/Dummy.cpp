@@ -118,6 +118,8 @@ void ADummy::ActivateRagdoll()
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Ragdoll"));
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetMesh()->SetSimulatePhysics(true);
 }
 

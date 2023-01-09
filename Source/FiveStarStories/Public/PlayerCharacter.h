@@ -49,6 +49,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Target")
 	AActor* EnemyTarget = nullptr;
 
+	// 카메라 전환
+	UFUNCTION(BlueprintCallable)
+	void MoveCamera(ECameraPosition CameraPosition);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -91,10 +95,6 @@ protected:
 	void ExecuteEnemy();
 	UFUNCTION(BlueprintCallable)
 	void SpawnMeshSlicer();
-
-	// 카메라 전환
-	UFUNCTION(BlueprintCallable)
-	void MoveCamera(ECameraPosition CameraPosition);
 
 private:
 	// 무브셋
