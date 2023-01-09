@@ -21,41 +21,54 @@ protected:
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	// 중복 공격 방지
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
-	TArray<AActor*> AlreadyHitActors;
-
-	// 공격 판정을 계산할 무기. StaticMesh에 "WeaponStart", "WeaponEnd"라는 이름의 소켓 필요
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	class UStaticMeshComponent* MainWeapon;
-
-	// 무기 두께
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	float WeaponThickness = 5.0f;
-
-	// 무기 공격 판정 시작 지점
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	FName StartPoint = TEXT("WeaponStart");
-
-	// 무기 공격 판정 끝 지점
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	FName EndPoint = TEXT("WeaponEnd");
-
-	// 공격 판정을 계산할 무기 지정. 반드시 BeginPlay()에서 이 함수를 호출해서 무기를 지정해줘야 작동함
+	// 무기 정보 설정
 	UFUNCTION(BlueprintCallable)
-	void SetMainWeapon(UStaticMeshComponent* WeaponMesh);
+	void SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType> InDamageType);
+
+	// 가할 대미지
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Please")
+	float BaseDamage;
+
+	// 대미지 피격 시 반응 (ex : 경직, 다운, 넉백, 공중에 뜸, 기절 등 )
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Please")
+	TSubclassOf<UDamageType> DamageType;
+	
+	// 공격 판정을 계산할 무기 지정. BeginPlay(), 무기 변경 시에 호출해줘야함
+	UFUNCTION(BlueprintCallable)
+	void SetWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness, bool InbEnableSlice);
 
 	UFUNCTION(BlueprintCallable)
 	void AttackCheckBegin();
 
 	// 공격 판정 계산. 필요시 메시 슬라이서 스폰
 	UFUNCTION(BlueprintCallable)
-	void AttackCheck(float InWeaponThickness = 5.0f, FName InStartSocketName = TEXT("WeaponStart"), FName InEndSocketName = TEXT("WeaponEnd"));
+	void AttackCheckTick();
 
 	UFUNCTION(BlueprintCallable)
 	void AttackCheckEnd();
 
 	// 적에게 데미지 가하기
 	UFUNCTION(BlueprintCallable)
-	void DealDamage(AActor* TargetEnemy, float BaseDamage, TSubclassOf<UDamageType> DamageType);
+	void DealDamage(AActor* TargetEnemy);
+
+	// 무기 두께
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Please")
+	float WeaponThickness = 5.0f;
+
+	// 무기 공격 판정 시작 지점
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Please")
+	FName StartPoint = TEXT("WeaponStart");
+
+	// 무기 공격 판정 끝 지점
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Please")
+	FName EndPoint = TEXT("WeaponEnd");
+
+	// 공격 판정을 계산할 무기. 소켓 2개 이상 필요
+	class UStaticMeshComponent* MainWeapon;
+
+	// 중복 공격 방지하기 위한 변수
+	TArray<AActor*> AlreadyHitActors;
+
+	// true일 경우에만 자르기 발동
+	bool bEnableSlice;
 };

@@ -27,11 +27,19 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 }
 
-void UCombatComponent::SetMainWeapon(UStaticMeshComponent* WeaponMesh)
+
+void UCombatComponent::SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType> InDamageType)
 {
-	MainWeapon = WeaponMesh;
+	BaseDamage = InBaseDamage;
+	DamageType = InDamageType;
 }
 
+void UCombatComponent::SetWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness, bool InbEnableSlice)
+{
+	MainWeapon = WeaponMesh;
+	WeaponThickness = InWeaponThickness;
+	bEnableSlice = InbEnableSlice;
+}
 
 void UCombatComponent::AttackCheckBegin()
 {
@@ -39,14 +47,14 @@ void UCombatComponent::AttackCheckBegin()
 	AlreadyHitActors.Empty();
 }
 
-void UCombatComponent::AttackCheck(float InWeaponThickness, FName InStartSocketName, FName InEndSocketName)
+void UCombatComponent::AttackCheckTick()
 {
 	// 트레이스 결과를 저장
 	TArray<FHitResult> hits;
 	// 트레이스 범위
-	FVector start = MainWeapon->GetSocketLocation(StartPoint);
-	FVector end = MainWeapon->GetSocketLocation(EndPoint);
-
+	FVector start = MainWeapon->GetSocketLocation(FName("WeaponStart"));
+	FVector end = MainWeapon->GetSocketLocation(FName("WeaponEnd"));
+	
 	// 찾을 오브젝트 타입 = Pawn, Destructible
 	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
 	TEnumAsByte<EObjectTypeQuery> pawn = UEngineTypes::ConvertToObjectType(ECC_Pawn);
@@ -69,10 +77,10 @@ void UCombatComponent::AttackCheck(float InWeaponThickness, FName InStartSocketN
 			AlreadyHitActors.Add(hitActor);
 
 			// 데미지 가하기
-			//DealDamage(hitActor);
+			DealDamage(hitActor);
 			
 			// ECC_Destructible이면 Mesh Slicer 스폰
-			if (hit.Component->GetCollisionObjectType() == ECC_Destructible)
+			if (bEnableSlice == true && hit.Component->GetCollisionObjectType() == ECC_Destructible)
 			{
 				auto player = Cast<APlayerCharacter>(GetOwner());
 				player->SpawnMeshSlicer();
@@ -89,11 +97,8 @@ void UCombatComponent::AttackCheckEnd()
 	AlreadyHitActors.Empty();
 }
 
-void UCombatComponent::DealDamage(AActor* TargetEnemy, float BaseDamage, TSubclassOf<UDamageType> DamageType)
+void UCombatComponent::DealDamage(AActor* TargetEnemy)
 {
-	// 디버그
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("DealDamage"));
-
 	FVector hitFromDirection = GetOwner()->GetActorLocation();
 	FHitResult info;
 	AController* instigator = GetOwner()->GetInstigatorController();

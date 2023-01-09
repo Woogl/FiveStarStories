@@ -48,7 +48,16 @@ void ADummy::LookAtPlayer()
 
 float ADummy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	hp = hp - DamageAmount;
+	if (hp > 0.f)
+	{
+		hp = hp - DamageAmount;
+		LookAtPlayer();
+		PerformHitReaction();
+	}
+	else
+	{
+		Death();
+	}
 
 	// 디버그
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%f"), hp));
@@ -68,6 +77,11 @@ void ADummy::OnExecuted()
 
 	// 테이크다운 애니메이션 실행
 	PlayAnimMontage(ExecutedReactions[0]);
+}
+
+void ADummy::Death()
+{
+	ActivateRagdoll();
 }
 
 void ADummy::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDelay)

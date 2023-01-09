@@ -40,6 +40,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnExecuted();
 
+	void Death();
+	
 	// 신체 절단
 	UFUNCTION(BlueprintCallable)
 	void SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDelay);
