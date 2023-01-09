@@ -46,6 +46,7 @@ void ADummy::LookAtPlayer()
 	SetActorRotation(newRotator);
 }
 
+
 float ADummy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	if (hp > 0.01f)
@@ -67,7 +68,17 @@ float ADummy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEv
 
 void ADummy::PerformHitReaction()
 {
-	PlayAnimMontage(HitReactions[0]);
+	// 0~4 중에 하나 뽑아서 재생
+	HitIndex = UKismetMathLibrary::RandomInteger(5);
+	PlayAnimMontage(HitReactions[HitIndex]);
+
+	// 디버그
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%d"), HitIndex));
+}
+
+void ADummy::PerformKnockback()
+{
+	PlayAnimMontage(Knockbacks[0]);
 }
 
 void ADummy::OnExecuted()

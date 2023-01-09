@@ -34,7 +34,7 @@ void UCombatComponent::SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType
 	DamageType = InDamageType;
 }
 
-void UCombatComponent::SetWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness)
+void UCombatComponent::SetupWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness)
 {
 	MainWeapon = WeaponMesh;
 	WeaponThickness = InWeaponThickness;
@@ -112,7 +112,7 @@ void UCombatComponent::DealDamage(AActor* TargetEnemy)
 
 void UCombatComponent::StartHitstop(float Time)
 {
-	GetOwner()->CustomTimeDilation = 0.01f;
+	GetOwner()->CustomTimeDilation = 0.1f;
 	GetOwner()->GetWorldTimerManager().SetTimer(HitstopTimer, this, &UCombatComponent::EndHitStop, Time, false);
 }
 

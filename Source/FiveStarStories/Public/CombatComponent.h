@@ -39,7 +39,7 @@ public:
 	
 	// 공격 판정을 계산할 무기 지정. BeginPlay(), 무기 변경 시에 호출해줘야함
 	UFUNCTION(BlueprintCallable)
-	void SetWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness);
+	void SetupWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness);
 
 	UFUNCTION(BlueprintCallable)
 	void AttackCheckBegin();

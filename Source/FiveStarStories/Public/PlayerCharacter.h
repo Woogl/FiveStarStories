@@ -45,6 +45,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	class UCombatComponent* CombatComp;
 
+	// 피격 시 호출
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 	// 타게팅 대상
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	AActor* EnemyTarget = nullptr;
