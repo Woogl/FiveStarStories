@@ -96,7 +96,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 기본 무기, 무기 두께, 자르기 발동 여부 설정
+	// 기본 무기, 무기 두께 설정
 	CombatComp->SetWeapon(Katana, 5.0f, true);
 
 	// 기본 무기 최대 콤보 수 설정
