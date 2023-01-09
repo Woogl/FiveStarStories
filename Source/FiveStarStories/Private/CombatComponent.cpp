@@ -34,11 +34,10 @@ void UCombatComponent::SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType
 	DamageType = InDamageType;
 }
 
-void UCombatComponent::SetWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness, bool InbEnableSlice)
+void UCombatComponent::SetWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness)
 {
 	MainWeapon = WeaponMesh;
 	WeaponThickness = InWeaponThickness;
-	bEnableSlice = InbEnableSlice;
 }
 
 void UCombatComponent::AttackCheckBegin()
@@ -52,8 +51,8 @@ void UCombatComponent::AttackCheckTick()
 	// 트레이스 결과를 저장
 	TArray<FHitResult> hits;
 	// 트레이스 범위
-	FVector start = MainWeapon->GetSocketLocation(FName("WeaponStart"));
-	FVector end = MainWeapon->GetSocketLocation(FName("WeaponEnd"));
+	FVector start = MainWeapon->GetSocketLocation(StartPoint);
+	FVector end = MainWeapon->GetSocketLocation(EndPoint);
 	
 	// 찾을 오브젝트 타입 = Pawn, Destructible
 	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;

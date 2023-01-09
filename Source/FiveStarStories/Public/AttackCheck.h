@@ -19,6 +19,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Custom")
 	float BaseDamage = 10.f;
 	
+	// 메시 슬라이서 스폰할지
+	UPROPERTY(EditAnywhere, Category = "Custom")
+	bool bShouldSlice = true;
+
 	// 데미지 피격 시 반응 (ex: 경직, 넉백, 다운, 기절 등)
 	UPROPERTY(EditAnywhere, Category = "Custom")
 	TSubclassOf<UDamageType> DamageType;

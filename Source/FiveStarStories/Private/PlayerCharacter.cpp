@@ -97,7 +97,7 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// 기본 무기, 무기 두께 설정
-	CombatComp->SetWeapon(Katana, 5.0f, true);
+	CombatComp->SetWeapon(Katana, 5.0f);
 
 	// 기본 무기 최대 콤보 수 설정
 	MaxAttackCount = Attacks.Num() - 1;

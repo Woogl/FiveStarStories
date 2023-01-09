@@ -35,7 +35,7 @@ public:
 	
 	// 공격 판정을 계산할 무기 지정. BeginPlay(), 무기 변경 시에 호출해줘야함
 	UFUNCTION(BlueprintCallable)
-	void SetWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness, bool InbEnableSlice);
+	void SetWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness);
 
 	UFUNCTION(BlueprintCallable)
 	void AttackCheckBegin();
@@ -57,11 +57,11 @@ public:
 
 	// 무기 공격 판정 시작 지점
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Please")
-	FName StartPoint = TEXT("WeaponStart");
+	FName StartPoint = FName("WeaponStart");
 
 	// 무기 공격 판정 끝 지점
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Please")
-	FName EndPoint = TEXT("WeaponEnd");
+	FName EndPoint = FName("WeaponEnd");
 
 	// 공격 판정을 계산할 무기. 소켓 2개 이상 필요
 	class UStaticMeshComponent* MainWeapon;
