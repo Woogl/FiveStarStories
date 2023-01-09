@@ -19,6 +19,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Custom")
 	float BaseDamage = 10.f;
 	
+	// 역경직 시간
+	UPROPERTY(EditAnywhere, Category = "Custom")
+	float HitStopDuration;
+
 	// 메시 슬라이서 스폰할지
 	UPROPERTY(EditAnywhere, Category = "Custom")
 	bool bShouldSlice = true;

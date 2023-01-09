@@ -26,11 +26,15 @@ public:
 	void SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType> InDamageType);
 
 	// 가할 대미지
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Please")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Custom")
 	float BaseDamage;
 
+	// 역경직 시간
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Custom")
+	float HitstopTime;
+
 	// 대미지 피격 시 반응 (ex : 경직, 다운, 넉백, 공중에 뜸, 기절 등 )
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Please")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Custom")
 	TSubclassOf<UDamageType> DamageType;
 	
 	// 공격 판정을 계산할 무기 지정. BeginPlay(), 무기 변경 시에 호출해줘야함
@@ -50,6 +54,11 @@ public:
 	// 적에게 데미지 가하기
 	UFUNCTION(BlueprintCallable)
 	void DealDamage(AActor* TargetEnemy);
+
+	// 역경직
+	FTimerHandle HitstopTimer;
+	void StartHitstop(float Time);
+	void EndHitStop();
 
 	// 무기 두께
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Please")

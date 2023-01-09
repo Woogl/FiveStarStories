@@ -48,10 +48,10 @@ void ADummy::LookAtPlayer()
 
 float ADummy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	if (hp > 0.f)
+	if (hp > 0.01f)
 	{
 		hp = hp - DamageAmount;
-		LookAtPlayer();
+		//LookAtPlayer();
 		PerformHitReaction();
 	}
 	else
@@ -133,6 +133,7 @@ void ADummy::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDe
 		GetWorldTimerManager().SetTimer(RagdollTimer, this, &ADummy::ActivateRagdoll, RagdollDelay, false);
 	}
 
+	// TODO: 잘라진 양 쪽에 각각 전기 이펙트 발생 루프
 }
 
 void ADummy::ActivateRagdoll()

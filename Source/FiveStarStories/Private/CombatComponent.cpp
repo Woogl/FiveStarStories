@@ -64,7 +64,7 @@ void UCombatComponent::AttackCheckTick()
 	TArray< AActor* > actorsToIgnore;
 
 	UKismetSystemLibrary::SphereTraceMultiForObjects(this, start, end, WeaponThickness, objectTypes, false, actorsToIgnore,
-		EDrawDebugTrace::ForDuration, hits, true, FLinearColor::Red, FLinearColor::Green, 0.5f);
+		EDrawDebugTrace::None, hits, true);
 
 	for (auto hit : hits)
 	{
@@ -84,8 +84,12 @@ void UCombatComponent::AttackCheckTick()
 				auto player = Cast<APlayerCharacter>(GetOwner());
 				player->SpawnMeshSlicer();
 			}
-			
-			// TODO : 데미지 가하기
+
+			// 역경직 발생
+			if (HitstopTime > 0.f)
+			{
+				StartHitstop(HitstopTime);
+			}
 		}
 	}
 }
@@ -104,5 +108,16 @@ void UCombatComponent::DealDamage(AActor* TargetEnemy)
 	AActor* damageCauser = GetOwner();
 	
 	UGameplayStatics::ApplyPointDamage(TargetEnemy, BaseDamage, hitFromDirection, info, instigator, damageCauser, DamageType);
+}
+
+void UCombatComponent::StartHitstop(float Time)
+{
+	GetOwner()->CustomTimeDilation = 0.01f;
+	GetOwner()->GetWorldTimerManager().SetTimer(HitstopTimer, this, &UCombatComponent::EndHitStop, Time, false);
+}
+
+void UCombatComponent::EndHitStop()
+{
+	GetOwner()->CustomTimeDilation = 1.f;
 }
 
