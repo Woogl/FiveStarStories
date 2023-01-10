@@ -11,8 +11,8 @@ void UAttackCheck::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 	{
 		CombatComp->AttackCheckBegin();
 		CombatComp->SetDamageInfo(BaseDamage, AttackType);
-		CombatComp->bEnableSlice = bShouldSlice;
 		CombatComp->HitstopTime = HitStopDuration;
+		//CombatComp->bEnableSlice = bShouldSlice;
 	}
 }
 

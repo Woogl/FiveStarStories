@@ -52,10 +52,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AttackCheckEnd();
 
-	// 적에게 데미지 가하기
-	UFUNCTION(BlueprintCallable)
-	void DealDamage(AActor* TargetEnemy);
-
 	// 역경직
 	FTimerHandle HitstopTimer;
 	void StartHitstop(float Time);
@@ -80,5 +76,5 @@ public:
 	TArray<AActor*> AlreadyHitActors;
 
 	// true일 경우에만 자르기 발동
-	bool bEnableSlice;
+	//bool bEnableSlice;
 };

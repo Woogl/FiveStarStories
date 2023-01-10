@@ -400,7 +400,7 @@ AActor* APlayerCharacter::GetNearestEnemy()
 				lastDistanceToEnemy = distanceToEnemy;
 				nearestEnemy = hit.GetActor();	// 더 가까우면 nearestEnemy 갱신
 				// 디버그
-				UKismetSystemLibrary::PrintString(this, TEXT("Nearest Target : ") + nearestEnemy->GetName());
+				//UKismetSystemLibrary::PrintString(this, TEXT("Nearest Target : ") + nearestEnemy->GetName());
 			}
 		}
 	}

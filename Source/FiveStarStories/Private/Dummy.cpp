@@ -15,8 +15,8 @@ ADummy::ADummy()
 	// 플레이어의 스프링암에 걸리지 않게
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	// 오토 타게팅할 때 대상으로 걸리지 않게
-	GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
-	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	//GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
+	//GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 }
 
 void ADummy::BeginPlay()
@@ -44,6 +44,8 @@ void ADummy::LookAtPlayer()
 
 float ADummy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
 	// 디버그
 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("TakeDamage"));
 

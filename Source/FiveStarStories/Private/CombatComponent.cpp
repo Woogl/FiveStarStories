@@ -4,8 +4,8 @@
 #include "CombatComponent.h"
 #include <Components/StaticMeshComponent.h>
 #include <Kismet/KismetSystemLibrary.h>
-#include "PlayerCharacter.h"
-#include "Dummy.h"
+//#include "PlayerCharacter.h"
+//#include "Dummy.h"
 #include <Kismet/GameplayStatics.h>
 
 UCombatComponent::UCombatComponent()
@@ -65,24 +65,41 @@ void UCombatComponent::AttackCheckTick()
 	TArray< AActor* > actorsToIgnore;
 
 	UKismetSystemLibrary::SphereTraceMultiForObjects(this, start, end, WeaponThickness, objectTypes, false, actorsToIgnore,
-		EDrawDebugTrace::None, hits, true);
+		EDrawDebugTrace::ForDuration, hits, true, FLinearColor::Red, FLinearColor::Green, 0.5f);
 
 	for (auto hit : hits)
 	{
 		auto hitActor = hit.GetActor();
-		// 이미 맞은 적들이 아닌지 체크
-		if (hitActor && !AlreadyHitActors.Contains(hitActor))
+		// 이미 때린 액터인지 체크
+		if (!AlreadyHitActors.Contains(hitActor))
 		{
-			// 새로 맞은 적이면 이미 맞은 적들에 추가
+			// 새로 때린 액터만 추가
 			AlreadyHitActors.Add(hitActor);
 
-			// 적에게 데미지 가하기
+			// 역경직 발생
+			if (HitstopTime > 0.f)
+			{
+				StartHitstop(HitstopTime);
+			}
+
+			// 대미지 가하기
 			if (hit.Component->GetCollisionObjectType() == ECC_Pawn)
 			{
-				auto target = Cast<ADummy>(hitActor);
-				target->OnAttacked(AttackType);
+				FHitResult hitinfo;
+				hitinfo.Item = (int32)AttackType;	// 0=Standard, 1=KnockDown, 2=KnockDown, 3=KnockUp, 4=NoReaction
+				UGameplayStatics::ApplyPointDamage(hitActor,
+					BaseDamage,
+					hitActor->GetActorLocation(),
+					hitinfo,
+					GetOwner()->GetInstigatorController(),
+					GetOwner(),
+					UDamageType::StaticClass());
+
+				// 디버그
+				//UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ApplyPointDamage"));
 			}
-						
+			
+			/*
 			// ECC_Destructible이면 Mesh Slicer 스폰
 			if (bEnableSlice == true && hit.Component->GetCollisionObjectType() == ECC_Destructible)
 			{
@@ -92,12 +109,9 @@ void UCombatComponent::AttackCheckTick()
 					player->SpawnMeshSlicer();
 				}
 			}
+			*/
 
-			// 역경직 발생
-			if (HitstopTime > 0.f)
-			{
-				StartHitstop(HitstopTime);
-			}
+
 		}
 	}
 }
@@ -108,20 +122,9 @@ void UCombatComponent::AttackCheckEnd()
 	AlreadyHitActors.Empty();
 }
 
-void UCombatComponent::DealDamage(AActor* TargetEnemy)
-{
-	FVector hitFromDirection = (TargetEnemy->GetActorLocation()) - (GetOwner()->GetActorLocation());
-	FHitResult info;
-	AController* instigator = GetOwner()->GetInstigatorController();
-	AActor* damageCauser = GetOwner();
-	
-	// 데미지 가하기
-	UGameplayStatics::ApplyPointDamage(TargetEnemy, BaseDamage, hitFromDirection, info, instigator, damageCauser, nullptr);
-}
-
 void UCombatComponent::StartHitstop(float Time)
 {
-	GetOwner()->CustomTimeDilation = 0.2f;
+	GetOwner()->CustomTimeDilation = 0.1f;
 	GetOwner()->GetWorldTimerManager().SetTimer(HitstopTimer, this, &UCombatComponent::EndHitStop, Time, false);
 }
 
