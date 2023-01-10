@@ -101,7 +101,25 @@ void APlayerCharacter::BeginPlay()
 
 	// 기본 무기 최대 콤보 수 설정
 	MaxAttackCount = Attacks.Num() - 1;
+
+	// 델리게이트 바인딩
+	//Katana->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnKatanaOverlapBegin);
+	//Katana->OnComponentEndOverlap.AddDynamic(this, &APlayerCharacter::OnKatanaOverlapEnd);
 }
+
+/*
+void APlayerCharacter::OnKatanaOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	SpawnMeshSlicer();
+}
+*/
+
+/*
+void APlayerCharacter::OnKatanaOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	SpawnMeshSlicer();
+}
+*/
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -207,14 +225,6 @@ void APlayerCharacter::Attack()
 	if (GetCharacterMovement()->IsFalling() == true)
 	{
 		PerformJumpAttack();
-	}
-	else if (bIsDashing == true)
-	{
-		PerformDashAttack();
-	}
-	else if (bIsBlocking == true)
-	{
-		PerformHeavyAttack();
 	}
 	else
 	{
@@ -328,22 +338,12 @@ void APlayerCharacter::PerformLightAttack()
 	}
 }
 
-void APlayerCharacter::PerformDashAttack()
-{
-
-}
-
 void APlayerCharacter::PerformJumpAttack()
 {
 	bIsAttacking = true;
 
 	// 몽타주 재생
 	PlayAnimMontage(JumpAttacks[0]);
-}
-
-void APlayerCharacter::PerformHeavyAttack()
-{
-
 }
 
 void APlayerCharacter::TryAutoTargeting()
@@ -388,7 +388,7 @@ AActor* APlayerCharacter::GetNearestEnemy()
 	float distanceToEnemy;
 
 	// 가장 가까운 적 찾기
-	for (auto hit : hits)	// 모든 FHitResult에 for문 돌리기
+	for (auto hit : hits)	// 모든 FHitResult에 for문 탐색
 	{
 		if (hit.GetActor())
 		{
@@ -461,5 +461,10 @@ void APlayerCharacter::MoveCamera(ECameraPosition CameraPosition)
 	FLatentActionInfo info;
 	info.CallbackTarget = this;
 	UKismetSystemLibrary::MoveComponentTo(FollowCamera, FVector(0.f), FRotator(0.f), false, false, 0.4f, true, EMoveComponentAction::Move, info);
+}
+
+void APlayerCharacter::SetKatanaCollisionProfileName(FName NewCollisionProfileName)
+{
+	Katana->SetCollisionProfileName(NewCollisionProfileName);
 }
 

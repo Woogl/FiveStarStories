@@ -20,15 +20,19 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:	
-	UFUNCTION()
-	void OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	// 메시 자르기
-	void SliceMesh(UPrimitiveComponent* TargetMesh);
-
+public:
 	// 단면에 씌울 머터리얼
 	UPROPERTY()
 	UMaterial* MatForSlicedSection = nullptr;
 
+private:
+	// 델리게이트 함수
+	//UFUNCTION()
+	//void OnBoxOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnBoxOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	// 메시 자르기
+	void SliceMesh(UPrimitiveComponent* TargetMesh);
 };

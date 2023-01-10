@@ -28,12 +28,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Custom", meta = (ClampMin = 0.f, ClampMax = 1.f))
 	float HitStopDuration;
 
-	/*
-	// 메시 슬라이서 스폰할지
-	UPROPERTY(EditAnywhere, Category = "Custom")
-	bool bShouldSlice = true;
-	*/
-
+	UPROPERTY()
 	class UCombatComponent* CombatComp;
 
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference) override;

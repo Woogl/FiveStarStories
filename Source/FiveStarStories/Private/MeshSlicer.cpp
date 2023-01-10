@@ -16,7 +16,11 @@ AMeshSlicer::AMeshSlicer()
 	RootComponent = Box;
 
 	// 델리게이트 바인딩
-	Box->OnComponentEndOverlap.AddDynamic(this, &AMeshSlicer::OverlapEnd);
+	//Box->OnComponentBeginOverlap.AddDynamic(this, &AMeshSlicer::OnBoxOverlapBegin);
+	Box->OnComponentEndOverlap.AddDynamic(this, &AMeshSlicer::OnBoxOverlapEnd);
+
+	// 스폰되고 0.01초 지나면 파괴
+	InitialLifeSpan = 0.01f;
 
 	// 디버그용
 	//Box->bHiddenInGame = false;
@@ -25,22 +29,39 @@ AMeshSlicer::AMeshSlicer()
 void AMeshSlicer::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	// 스폰되고 0.01초 지나면 파괴
-	SetLifeSpan(0.01f);
+
+	//디버그
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("SpawnMeshSlicer"));
 }
 
-void AMeshSlicer::OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+
+void AMeshSlicer::OnBoxOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	// 단면에 덮어씌울 머터리얼 가져오기
 	auto sliceTarget = Cast<ASliceableActorBase>(OtherActor);
 	MatForSlicedSection = sliceTarget->SectionMaterial;
 
+	// 충돌한 메시 자르고 파괴
 	SliceMesh(OtherComp);
 }
 
+/*
+void AMeshSlicer::OnBoxOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	auto sliceTarget = Cast<ASliceableActorBase>(OtherActor);
+	MatForSlicedSection = sliceTarget->SectionMaterial;
+
+	// 충돌한 메시 자르고 파괴 
+	SliceMesh(OtherComp);
+	Destroy();
+}
+*/
+
 void AMeshSlicer::SliceMesh(UPrimitiveComponent* TargetMesh)
 {
+	// 디버그
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("SliceMesh"));
+
 	// 자를 메시
 	UProceduralMeshComponent* meshToSlice = Cast<UProceduralMeshComponent>(TargetMesh);
 	FVector planePosition = Box->GetComponentLocation();
