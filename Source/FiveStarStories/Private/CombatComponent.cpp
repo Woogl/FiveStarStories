@@ -5,6 +5,7 @@
 #include <Components/StaticMeshComponent.h>
 #include <Kismet/KismetSystemLibrary.h>
 #include "PlayerCharacter.h"
+#include "Dummy.h"
 #include <Kismet/GameplayStatics.h>
 
 UCombatComponent::UCombatComponent()
@@ -28,10 +29,10 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 }
 
 
-void UCombatComponent::SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType> InDamageType)
+void UCombatComponent::SetDamageInfo(float InBaseDamage, EAttackType InAttackType)
 {
 	BaseDamage = InBaseDamage;
-	DamageType = InDamageType;
+	AttackType = InAttackType;
 }
 
 void UCombatComponent::SetupWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness)
@@ -75,14 +76,21 @@ void UCombatComponent::AttackCheckTick()
 			// 새로 맞은 적이면 이미 맞은 적들에 추가
 			AlreadyHitActors.Add(hitActor);
 
-			// 데미지 가하기
-			DealDamage(hitActor);
-			
+			// 적에게 데미지 가하기
+			if (hit.Component->GetCollisionObjectType() == ECC_Pawn)
+			{
+				auto target = Cast<ADummy>(hitActor);
+				target->OnAttacked(AttackType);
+			}
+						
 			// ECC_Destructible이면 Mesh Slicer 스폰
 			if (bEnableSlice == true && hit.Component->GetCollisionObjectType() == ECC_Destructible)
 			{
 				auto player = Cast<APlayerCharacter>(GetOwner());
-				player->SpawnMeshSlicer();
+				if (player)
+				{
+					player->SpawnMeshSlicer();
+				}
 			}
 
 			// 역경직 발생
@@ -102,17 +110,18 @@ void UCombatComponent::AttackCheckEnd()
 
 void UCombatComponent::DealDamage(AActor* TargetEnemy)
 {
-	FVector hitFromDirection = GetOwner()->GetActorLocation();
+	FVector hitFromDirection = (TargetEnemy->GetActorLocation()) - (GetOwner()->GetActorLocation());
 	FHitResult info;
 	AController* instigator = GetOwner()->GetInstigatorController();
 	AActor* damageCauser = GetOwner();
 	
-	UGameplayStatics::ApplyPointDamage(TargetEnemy, BaseDamage, hitFromDirection, info, instigator, damageCauser, DamageType);
+	// 데미지 가하기
+	UGameplayStatics::ApplyPointDamage(TargetEnemy, BaseDamage, hitFromDirection, info, instigator, damageCauser, nullptr);
 }
 
 void UCombatComponent::StartHitstop(float Time)
 {
-	GetOwner()->CustomTimeDilation = 0.1f;
+	GetOwner()->CustomTimeDilation = 0.2f;
 	GetOwner()->GetWorldTimerManager().SetTimer(HitstopTimer, this, &UCombatComponent::EndHitStop, Time, false);
 }
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
+#include "EAttackType.h"
 #include "AttackCheck.generated.h"
 
 /**
@@ -27,9 +28,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Custom")
 	bool bShouldSlice = true;
 
-	// 데미지 피격 시 반응 (ex: 경직, 넉백, 다운, 기절 등)
+	// 공격 타입 (ex: 경직, 넉백, 다운 등)
 	UPROPERTY(EditAnywhere, Category = "Custom")
-	TSubclassOf<UDamageType> DamageType;
+	EAttackType AttackType;
 
 	class UCombatComponent* CombatComp;
 

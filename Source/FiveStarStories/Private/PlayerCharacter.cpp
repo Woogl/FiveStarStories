@@ -59,14 +59,14 @@ APlayerCharacter::APlayerCharacter()
 	LeftCameraBoom->SetupAttachment(RootComponent);
 	LeftCameraBoom->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 	LeftCameraBoom->TargetArmLength = 225.f;
-	LeftCameraBoom->TargetOffset = FVector(-80.f, 0.f, 0.f);
+	//LeftCameraBoom->TargetOffset = FVector(-80.f, 0.f, 0.f);
 
 	// 우측 사이드뷰 스프링암
 	RightCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("RightCameraBoom"));
 	RightCameraBoom->SetupAttachment(RootComponent);
 	RightCameraBoom->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 	RightCameraBoom->TargetArmLength = 225.f;
-	RightCameraBoom->TargetOffset = FVector(-80.f, 0.f, 0.f);
+	//RightCameraBoom->TargetOffset = FVector(-80.f, 0.f, 0.f);
 
 	// 카메라
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));

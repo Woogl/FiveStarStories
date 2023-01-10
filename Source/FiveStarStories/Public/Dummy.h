@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "EBodyPart.h"
+#include "EAttackType.h"
 #include "Dummy.generated.h"
 
 UCLASS()
@@ -13,31 +14,23 @@ class FIVESTARSTORIES_API ADummy : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ADummy();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// 플레이어 쳐다보기
 	void LookAtPlayer();
 
-	// 피격 시 호출
+	// 체력 감소
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	// 맞는 애니메이션 재생
-	void PerformHitReaction();
-
-	// 맞는 애니메이션 재생
-	void PerformKnockback();
+	// 맞았을 때
+	UFUNCTION(BlueprintCallable)
+	void OnAttacked(EAttackType AttackType);
 
 	// 처형 발동될 때
 	UFUNCTION(BlueprintCallable)
@@ -67,8 +60,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Executed Reactions")
 	TArray<UAnimMontage*> ExecutedReactions;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float MaxHealth = 100.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float hp = 100.f;
+	float CurrentHealth;
 
 	int32 HitIndex;
 };

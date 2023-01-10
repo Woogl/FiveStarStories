@@ -6,6 +6,7 @@
 #include <Kismet/KismetMathLibrary.h>
 #include <Kismet/KismetSystemLibrary.h>
 #include <Components/CapsuleComponent.h>
+#include <GameFramework/CharacterMovementComponent.h>
 
 ADummy::ADummy()
 {
@@ -22,18 +23,13 @@ void ADummy::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// 초기 체력 설정
+	CurrentHealth = MaxHealth;
 }
 
 void ADummy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-}
-
-// 질문 : 적한테는 이 함수가 필요없을거 같은데 지워도 되나?
-void ADummy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
 
@@ -46,39 +42,47 @@ void ADummy::LookAtPlayer()
 	SetActorRotation(newRotator);
 }
 
-
 float ADummy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	if (hp > 0.01f)
+	// 디버그
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("TakeDamage"));
+
+	// 체력만 깎음
+	if (CurrentHealth > 0.f)
 	{
-		hp = hp - DamageAmount;
-		//LookAtPlayer();
-		PerformHitReaction();
+		CurrentHealth -= DamageAmount;
+	}
+
+	return DamageAmount;
+}
+
+void ADummy::OnAttacked(EAttackType AttackType)
+{
+	// 디버그
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("OnAttacked"));
+
+	if (AttackType == EAttackType::EAT_Standard)
+	{
+		// 0~4 중에 하나 뽑아서 재생
+		HitIndex = UKismetMathLibrary::RandomInteger(5);
+		PlayAnimMontage(HitReactions[HitIndex]);
+	}
+	else if (AttackType == EAttackType::EAT_KnockBack)
+	{
+
+	}
+	else if (AttackType == EAttackType::EAT_KnockDown)
+	{
+
+	}
+	else if (AttackType == EAttackType::EAT_KnockUp)
+	{
+
 	}
 	else
 	{
-		Death();
+		// EAT_NoResponse
 	}
-
-	// 디버그
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%f"), hp));
-
-	return hp;
-}
-
-void ADummy::PerformHitReaction()
-{
-	// 0~4 중에 하나 뽑아서 재생
-	HitIndex = UKismetMathLibrary::RandomInteger(5);
-	PlayAnimMontage(HitReactions[HitIndex]);
-
-	// 디버그
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%d"), HitIndex));
-}
-
-void ADummy::PerformKnockback()
-{
-	PlayAnimMontage(Knockbacks[0]);
 }
 
 void ADummy::OnExecuted()
@@ -92,6 +96,7 @@ void ADummy::OnExecuted()
 
 void ADummy::Death()
 {
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
 	ActivateRagdoll();
 }
 

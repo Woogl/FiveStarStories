@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "EAttackType.h"
 #include "CombatComponent.generated.h"
 
 
@@ -23,7 +24,7 @@ public:
 
 	// 무기 정보 설정
 	UFUNCTION(BlueprintCallable)
-	void SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType> InDamageType);
+	void SetDamageInfo(float InBaseDamage, EAttackType InAttackType);
 
 	// 가할 대미지
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Custom")
@@ -33,9 +34,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Custom")
 	float HitstopTime;
 
-	// 대미지 피격 시 반응 (ex : 경직, 다운, 넉백, 공중에 뜸, 기절 등 )
+	// 대미지 피격 시 반응 (ex : 경직, 다운, 넉백, 공중에 뜸 등 )
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Custom")
-	TSubclassOf<UDamageType> DamageType;
+	EAttackType AttackType;
 	
 	// 공격 판정을 계산할 무기 지정. BeginPlay(), 무기 변경 시에 호출해줘야함
 	UFUNCTION(BlueprintCallable)
