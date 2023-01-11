@@ -59,14 +59,12 @@ APlayerCharacter::APlayerCharacter()
 	LeftCameraBoom->SetupAttachment(RootComponent);
 	LeftCameraBoom->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 	LeftCameraBoom->TargetArmLength = 225.f;
-	//LeftCameraBoom->TargetOffset = FVector(-80.f, 0.f, 0.f);
 
 	// 우측 사이드뷰 스프링암
 	RightCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("RightCameraBoom"));
 	RightCameraBoom->SetupAttachment(RootComponent);
 	RightCameraBoom->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 	RightCameraBoom->TargetArmLength = 225.f;
-	//RightCameraBoom->TargetOffset = FVector(-80.f, 0.f, 0.f);
 
 	// 카메라
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -108,16 +106,21 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 타겟팅한 적 있으면 Yaw 회전
-	if (bIsTargeting == true)
+	if (bIsTargeting == true )
 	{
 		RotateToEnemy();
 		// 거리가 멀어지면 타겟 해제
-		if (GetDistanceTo(EnemyTarget) > 500.f)
+		if (GetDistanceTo(EnemyTarget) > 800.f)
 		{
 			EnemyTarget = nullptr;
 			bIsTargeting = false;
 		}
 	}
+
+	// 디버그
+	float forwardInput = InputComponent->GetAxisValue("Move Forward / Backward");
+	float rightInput = InputComponent->GetAxisValue("Move Right / Left");
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Cyan, FString::Printf(TEXT("F/B : %f    R/L : %f"), forwardInput, rightInput));
 }
 
 // 키 입력
@@ -134,6 +137,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::Interact);
 	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &APlayerCharacter::Dash);
 	PlayerInputComponent->BindAction("Dash", IE_Released, this, &APlayerCharacter::StopDash);
+	PlayerInputComponent->BindAction("Finisher", IE_Pressed, this, &APlayerCharacter::Finisher);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &APlayerCharacter::MoveRight);
@@ -256,8 +260,37 @@ void APlayerCharacter::Dash()
 {
 	// 대시 가능한 상태인지 체크
 	if (CanDash() == false) return;
-
+	
 	bIsDashing = true;
+	
+	// 회피 방향
+	float forwardInput = InputComponent->GetAxisValue("Move Forward / Backward");
+	float rightInput = InputComponent->GetAxisValue("Move Right / Left");
+
+	if (bIsTargeting == true)
+	{
+		if (forwardInput > 0.5f)
+		{
+			PlayAnimMontage(Dodges[0]); // 앞으로 회피
+		}
+		else if (rightInput > 0.5f)
+		{
+			PlayAnimMontage(Dodges[3]); // 오른쪽 회피
+		}
+		else if (rightInput < -0.5f)
+		{
+			PlayAnimMontage(Dodges[2]); // 왼쪽 회피
+		}
+		else
+		{
+			PlayAnimMontage(Dodges[1]); // 뒤로 회피
+		}
+	}
+	else
+	{
+		PlayAnimMontage(Dodges[4]); // 구르기
+	}
+
 	// 이동속도 증가
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 }
@@ -267,6 +300,14 @@ void APlayerCharacter::StopDash()
 	bIsDashing = false;
 	// 이동속도 초기화
 	GetCharacterMovement()->MaxWalkSpeed = 350.f;
+}
+
+void APlayerCharacter::Finisher()
+{
+	if (CanAttack() == false) return;
+
+	EnemyTarget = GetNearestEnemy();
+	MotionMorph();
 }
 
 bool APlayerCharacter::CanDoJump()
@@ -403,9 +444,9 @@ void APlayerCharacter::RotateToEnemy()
 	}
 }
 
-void APlayerCharacter::ExecuteEnemy()
+void APlayerCharacter::FinishEnemy()
 {
-	PlayAnimMontage(Executions[0]);
+	PlayAnimMontage(Finishers[0]);
 }
 
 void APlayerCharacter::SpawnMeshSlicer()
@@ -413,14 +454,6 @@ void APlayerCharacter::SpawnMeshSlicer()
 	FActorSpawnParameters spawnParams;
 	FTransform spawnTransform = Katana->GetComponentTransform();
 	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), spawnTransform, spawnParams);
-}
-
-float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
-{
-	// TODO: 피격
-	PlayAnimMontage(HitReactions[0]);
-
-	return DamageAmount;
 }
 
 void APlayerCharacter::MoveCamera(ECameraPosition CameraPosition)

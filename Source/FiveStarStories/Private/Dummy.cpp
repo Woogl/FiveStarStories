@@ -42,22 +42,6 @@ void ADummy::LookAtPlayer()
 	SetActorRotation(newRotator);
 }
 
-float ADummy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
-{
-	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	// 디버그
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("TakeDamage"));
-
-	// 체력만 깎음
-	if (CurrentHealth > 0.f)
-	{
-		CurrentHealth -= DamageAmount;
-	}
-
-	return DamageAmount;
-}
-
 void ADummy::OnAttacked(EAttackType AttackType)
 {
 	// 디버그
@@ -81,25 +65,19 @@ void ADummy::OnAttacked(EAttackType AttackType)
 	{
 
 	}
-	else
+	else // (AttackType == EAttackType::EAT_NoResponse)
 	{
-		// EAT_NoResponse
+		
 	}
 }
 
-void ADummy::OnExecuted()
+void ADummy::OnFinishered()
 {
 	// 플레이어 쳐다보기
 	LookAtPlayer();
 
 	// 테이크다운 애니메이션 실행
 	PlayAnimMontage(ExecutedReactions[0]);
-}
-
-void ADummy::Death()
-{
-	GetCharacterMovement()->SetMovementMode(MOVE_None);
-	ActivateRagdoll();
 }
 
 void ADummy::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDelay)

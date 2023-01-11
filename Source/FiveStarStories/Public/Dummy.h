@@ -25,18 +25,13 @@ public:
 	// 플레이어 쳐다보기
 	void LookAtPlayer();
 
-	// 체력 감소
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
 	// 맞았을 때
 	UFUNCTION(BlueprintCallable)
 	void OnAttacked(EAttackType AttackType);
 
-	// 처형 발동될 때
+	// 마무리 공격 당할 때
 	UFUNCTION(BlueprintCallable)
-	void OnExecuted();
-
-	void Death();
+	void OnFinishered();
 	
 	// 신체 절단
 	UFUNCTION(BlueprintCallable)

@@ -45,9 +45,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	class UCombatComponent* CombatComp;
 
-	// 피격 시 호출
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
 	// 타게팅 대상
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	AActor* EnemyTarget = nullptr;
@@ -75,6 +72,7 @@ protected:
 	void Interact();
 	void Dash();
 	void StopDash();
+	void Finisher();
 
 	// 액션 실행 가능 여부 체크
 	bool CanDoJump();
@@ -93,9 +91,12 @@ protected:
 	AActor* GetNearestEnemy();
 	void RotateToEnemy();
 
-	// 테이크다운
+	// 마무리 공격
 	UFUNCTION(BlueprintCallable)
-	void ExecuteEnemy();
+	void FinishEnemy();
+	// BP에서 이벤트 구현
+	UFUNCTION(BlueprintImplementableEvent)
+	void MotionMorph();
 
 private:
 	// 무브셋
@@ -105,14 +106,17 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	TArray<class UAnimMontage*> JumpAttacks;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Executions")
-	TArray<UAnimMontage*> Executions;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Finishers")
+	TArray<UAnimMontage*> Finishers;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	TArray<UAnimMontage*> GuardHits;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	UAnimMontage* GuardBreak;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Dodges")
+	TArray<class UAnimMontage*> Dodges;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
 	TArray<UAnimMontage*> Interactions;
