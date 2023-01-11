@@ -101,25 +101,7 @@ void APlayerCharacter::BeginPlay()
 
 	// 기본 무기 최대 콤보 수 설정
 	MaxAttackCount = Attacks.Num() - 1;
-
-	// 델리게이트 바인딩
-	//Katana->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnKatanaOverlapBegin);
-	//Katana->OnComponentEndOverlap.AddDynamic(this, &APlayerCharacter::OnKatanaOverlapEnd);
 }
-
-/*
-void APlayerCharacter::OnKatanaOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	SpawnMeshSlicer();
-}
-*/
-
-/*
-void APlayerCharacter::OnKatanaOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	SpawnMeshSlicer();
-}
-*/
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -394,13 +376,11 @@ AActor* APlayerCharacter::GetNearestEnemy()
 		{
 			// 적과의 거리 체크
 			distanceToEnemy = GetDistanceTo(hit.GetActor());
-			// 가장 가까운 적인지 체크
+			// 가장 가까운 적인지 체크. 더 가까우면 nearestEnemy 갱신
 			if (distanceToEnemy <= lastDistanceToEnemy)
 			{
 				lastDistanceToEnemy = distanceToEnemy;
-				nearestEnemy = hit.GetActor();	// 더 가까우면 nearestEnemy 갱신
-				// 디버그
-				//UKismetSystemLibrary::PrintString(this, TEXT("Nearest Target : ") + nearestEnemy->GetName());
+				nearestEnemy = hit.GetActor();
 			}
 		}
 	}
@@ -461,10 +441,5 @@ void APlayerCharacter::MoveCamera(ECameraPosition CameraPosition)
 	FLatentActionInfo info;
 	info.CallbackTarget = this;
 	UKismetSystemLibrary::MoveComponentTo(FollowCamera, FVector(0.f), FRotator(0.f), false, false, 0.4f, true, EMoveComponentAction::Move, info);
-}
-
-void APlayerCharacter::SetKatanaCollisionProfileName(FName NewCollisionProfileName)
-{
-	Katana->SetCollisionProfileName(NewCollisionProfileName);
 }
 

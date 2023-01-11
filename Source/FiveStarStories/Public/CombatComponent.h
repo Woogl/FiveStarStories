@@ -22,6 +22,20 @@ protected:
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	// 공격 판정을 계산할 무기 지정. BeginPlay(), 무기 변경 시에 호출해줘야함
+	UFUNCTION(BlueprintCallable)
+	void SetupWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness);
+
+	UFUNCTION(BlueprintCallable)
+	void AttackCheckBegin();
+
+	// 공격 판정 계산. 필요시 메시 슬라이서 스폰
+	UFUNCTION(BlueprintCallable)
+	void AttackCheckTick();
+
+	UFUNCTION(BlueprintCallable)
+	void AttackCheckEnd();
+
 	// 무기 정보 설정
 	UFUNCTION(BlueprintCallable)
 	void SetDamageInfo(float InBaseDamage, EAttackType InAttackType);
@@ -37,20 +51,12 @@ public:
 	// 대미지 피격 시 반응 (ex : 경직, 다운, 넉백, 공중에 뜸 등 )
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Custom")
 	EAttackType AttackType;
+
+	// 자르기 가능하게 할지
+	bool bEnableSlice = false;
 	
-	// 공격 판정을 계산할 무기 지정. BeginPlay(), 무기 변경 시에 호출해줘야함
-	UFUNCTION(BlueprintCallable)
-	void SetupWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness);
-
-	UFUNCTION(BlueprintCallable)
-	void AttackCheckBegin();
-
-	// 공격 판정 계산. 필요시 메시 슬라이서 스폰
-	UFUNCTION(BlueprintCallable)
-	void AttackCheckTick();
-
-	UFUNCTION(BlueprintCallable)
-	void AttackCheckEnd();
+	// 대미지 가하기
+	void DealDamage(AActor* Target);
 
 	// 역경직
 	FTimerHandle HitstopTimer;
@@ -74,7 +80,4 @@ public:
 
 	// 중복 공격 방지하기 위한 변수
 	TArray<AActor*> AlreadyHitActors;
-
-	// true일 경우에만 자르기 발동
-	//bool bEnableSlice;
 };

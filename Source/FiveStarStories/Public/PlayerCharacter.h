@@ -55,27 +55,12 @@ public:
 	// 카메라 전환
 	void MoveCamera(ECameraPosition CameraPosition);
 
-	// Anim Notify State에서 사용
-	void SetKatanaCollisionProfileName(FName NewCollisionProfileName);
-
 	// 메시 자르는 액터 스폰
 	void SpawnMeshSlicer();
-
-	// 메시 자르는 액터 스폰 가능한지 여부
-	bool bCanSlice = true;
-
-	// 이미 자른 물체를 보관
-	TArray<AActor*> AlreadySlicedActors;
 
 protected:
 	virtual void BeginPlay() override;
 
-	// 델리게이트
-	//UFUNCTION()
-	//void OnKatanaOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	//UFUNCTION()
-	//void OnKatanaOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	
 	// 축 입력
 	void MoveForward(float Value);
 	void MoveRight(float Value);
@@ -143,7 +128,7 @@ private:
 	// 카메라
 	bool bIsTargeting = false;
 
-	// 무기 데이터 (0: 카타나)
+	// 무기 데이터 (0=카타나)
 	int WeaponIndex = 0;
 
 	// 공격 콤보 카운트

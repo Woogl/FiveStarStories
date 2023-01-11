@@ -12,7 +12,7 @@ AMeshSlicer::AMeshSlicer()
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	Box->SetCollisionProfileName(TEXT("SliceQuery"));
 	// 자를 크기 설정
-	Box->SetBoxExtent(FVector(15.f, 45.f, 0.f));
+	Box->SetBoxExtent(FVector(10.f, 45.f, 0.f));
 	RootComponent = Box;
 
 	// 델리게이트 바인딩
@@ -31,7 +31,7 @@ void AMeshSlicer::BeginPlay()
 	Super::BeginPlay();
 
 	//디버그
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("SpawnMeshSlicer"));
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("SpawnMeshSlicer"));
 }
 
 
@@ -60,7 +60,7 @@ void AMeshSlicer::OnBoxOverlapBegin(class UPrimitiveComponent* OverlappedComp, c
 void AMeshSlicer::SliceMesh(UPrimitiveComponent* TargetMesh)
 {
 	// 디버그
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("SliceMesh"));
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("SliceMesh"));
 
 	// 자를 메시
 	UProceduralMeshComponent* meshToSlice = Cast<UProceduralMeshComponent>(TargetMesh);

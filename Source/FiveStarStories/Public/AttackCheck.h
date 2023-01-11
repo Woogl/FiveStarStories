@@ -28,6 +28,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Custom", meta = (ClampMin = 0.f, ClampMax = 1.f))
 	float HitStopDuration;
 
+	// 자르기 가능하게 할지
+	UPROPERTY(EditAnywhere, Category = "Custom")
+	bool bShouldSlice = false;
+
 	UPROPERTY()
 	class UCombatComponent* CombatComp;
 
