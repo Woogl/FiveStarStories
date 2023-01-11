@@ -42,35 +42,6 @@ void ADummy::LookAtPlayer()
 	SetActorRotation(newRotator);
 }
 
-void ADummy::OnAttacked(EAttackType AttackType)
-{
-	// 디버그
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("OnAttacked"));
-
-	if (AttackType == EAttackType::EAT_Standard)
-	{
-		// 0~4 중에 하나 뽑아서 재생
-		HitIndex = UKismetMathLibrary::RandomInteger(5);
-		PlayAnimMontage(HitReactions[HitIndex]);
-	}
-	else if (AttackType == EAttackType::EAT_KnockBack)
-	{
-
-	}
-	else if (AttackType == EAttackType::EAT_KnockDown)
-	{
-
-	}
-	else if (AttackType == EAttackType::EAT_KnockUp)
-	{
-
-	}
-	else // (AttackType == EAttackType::EAT_NoResponse)
-	{
-		
-	}
-}
-
 void ADummy::OnFinishered()
 {
 	// 플레이어 쳐다보기

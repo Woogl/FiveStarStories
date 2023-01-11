@@ -106,21 +106,23 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 타겟팅한 적 있으면 Yaw 회전
-	if (bIsTargeting == true )
+	if (bIsTargeting == true)
 	{
-		RotateToEnemy();
+		RotateToEnemyTarget();
 		// 거리가 멀어지면 타겟 해제
-		if (GetDistanceTo(EnemyTarget) > 800.f)
+		if (GetDistanceTo(EnemyTarget) > 1000.f)
 		{
 			EnemyTarget = nullptr;
 			bIsTargeting = false;
 		}
 	}
 
+	/*
 	// 디버그
 	float forwardInput = InputComponent->GetAxisValue("Move Forward / Backward");
 	float rightInput = InputComponent->GetAxisValue("Move Right / Left");
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Cyan, FString::Printf(TEXT("F/B : %f    R/L : %f"), forwardInput, rightInput));
+	*/
 }
 
 // 키 입력
@@ -204,8 +206,8 @@ void APlayerCharacter::Attack()
 	// 오토 타겟팅할 적 탐색
 	TryAutoTargeting();
 
-	// 타겟팅한 적을 향해 Yaw 회전
-	RotateToEnemy();
+	// 타겟 바라보게
+	RotateToEnemyTarget();
 
 	// 공격 분기점
 	if (GetCharacterMovement()->IsFalling() == true)
@@ -263,17 +265,18 @@ void APlayerCharacter::Dash()
 	
 	bIsDashing = true;
 	
+	/*
 	// 회피 방향
 	float forwardInput = InputComponent->GetAxisValue("Move Forward / Backward");
 	float rightInput = InputComponent->GetAxisValue("Move Right / Left");
 
 	if (bIsTargeting == true)
 	{
-		if (forwardInput > 0.5f)
+		if (forwardInput >= 0.5f)
 		{
 			PlayAnimMontage(Dodges[0]); // 앞으로 회피
 		}
-		else if (rightInput > 0.5f)
+		else if (rightInput >= 0.5f)
 		{
 			PlayAnimMontage(Dodges[3]); // 오른쪽 회피
 		}
@@ -290,6 +293,7 @@ void APlayerCharacter::Dash()
 	{
 		PlayAnimMontage(Dodges[4]); // 구르기
 	}
+	*/
 
 	// 이동속도 증가
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
@@ -430,12 +434,11 @@ AActor* APlayerCharacter::GetNearestEnemy()
 	return nearestEnemy;
 }
 
-void APlayerCharacter::RotateToEnemy()
-{
+void APlayerCharacter::RotateToEnemyTarget()
+{	
 	// 타겟팅한 적이 있는 경우
 	if (EnemyTarget)
 	{
-		// 적을 향해 Yaw 회전
 		FRotator newRotation;
 		newRotation.Pitch = GetActorRotation().Pitch;
 		newRotation.Roll = GetActorRotation().Roll;

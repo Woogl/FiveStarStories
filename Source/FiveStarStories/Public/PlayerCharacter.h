@@ -89,7 +89,7 @@ protected:
 	void TryAutoTargeting();
 	UFUNCTION(BlueprintCallable)
 	AActor* GetNearestEnemy();
-	void RotateToEnemy();
+	void RotateToEnemyTarget();
 
 	// 마무리 공격
 	UFUNCTION(BlueprintCallable)

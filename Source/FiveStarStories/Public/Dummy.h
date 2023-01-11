@@ -25,10 +25,6 @@ public:
 	// 플레이어 쳐다보기
 	void LookAtPlayer();
 
-	// 맞았을 때
-	UFUNCTION(BlueprintCallable)
-	void OnAttacked(EAttackType AttackType);
-
 	// 마무리 공격 당할 때
 	UFUNCTION(BlueprintCallable)
 	void OnFinishered();
