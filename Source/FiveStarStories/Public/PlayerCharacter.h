@@ -98,6 +98,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void MotionMorph();
 
+	// 회피 각도 계산
+	float CalculateDodgeDirection(const FVector& Velocity, const FRotator& BaseRotation);
+
 private:
 	// 무브셋
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")

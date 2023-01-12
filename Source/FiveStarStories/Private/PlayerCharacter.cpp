@@ -265,35 +265,28 @@ void APlayerCharacter::Dash()
 	
 	bIsDashing = true;
 	
-	/*
-	// 회피 방향
-	float forwardInput = InputComponent->GetAxisValue("Move Forward / Backward");
-	float rightInput = InputComponent->GetAxisValue("Move Right / Left");
+	// 회피 방향 계산
+	FVector inputVector = GetLastMovementInputVector();
+	FRotator baseRotation = GetActorRotation();
+	float dodgeAngle = CalculateDodgeDirection(inputVector, baseRotation);
 
-	if (bIsTargeting == true)
+	// 회피 발동
+	if (dodgeAngle >= -45.0f && dodgeAngle <= 45.f)
 	{
-		if (forwardInput >= 0.5f)
-		{
-			PlayAnimMontage(Dodges[0]); // 앞으로 회피
-		}
-		else if (rightInput >= 0.5f)
-		{
-			PlayAnimMontage(Dodges[3]); // 오른쪽 회피
-		}
-		else if (rightInput < -0.5f)
-		{
-			PlayAnimMontage(Dodges[2]); // 왼쪽 회피
-		}
-		else
-		{
-			PlayAnimMontage(Dodges[1]); // 뒤로 회피
-		}
+		PlayAnimMontage(Dodges[0]); // 앞으로
 	}
-	else
+	else if (dodgeAngle > 45.f && dodgeAngle <= 135.f)
 	{
-		PlayAnimMontage(Dodges[4]); // 구르기
+		PlayAnimMontage(Dodges[1]); // 오른쪽으로
 	}
-	*/
+	else if (dodgeAngle > -135.f && dodgeAngle < -45.f)
+	{
+		PlayAnimMontage(Dodges[2]); // 왼쪽으로
+	}
+	else // (dodgeAngle 135.f > && dodgeAngle < -135.f)
+	{
+		PlayAnimMontage(Dodges[3]); // 뒤로
+	}
 
 	// 이동속도 증가
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
@@ -450,6 +443,33 @@ void APlayerCharacter::RotateToEnemyTarget()
 void APlayerCharacter::FinishEnemy()
 {
 	PlayAnimMontage(Finishers[0]);
+}
+
+float APlayerCharacter::CalculateDodgeDirection(const FVector& Velocity, const FRotator& BaseRotation)
+{
+	if (!Velocity.IsNearlyZero())
+	{
+		FMatrix RotMatrix = FRotationMatrix(BaseRotation);
+		FVector ForwardVector = RotMatrix.GetScaledAxis(EAxis::X);
+		FVector RightVector = RotMatrix.GetScaledAxis(EAxis::Y);
+		FVector NormalizedVel = Velocity.GetSafeNormal2D();
+
+		// get a cos(alpha) of forward vector vs velocity
+		float ForwardCosAngle = FVector::DotProduct(ForwardVector, NormalizedVel);
+		// now get the alpha and convert to degree
+		float ForwardDeltaDegree = FMath::RadiansToDegrees(FMath::Acos(ForwardCosAngle));
+
+		// depending on where right vector is, flip it
+		float RightCosAngle = FVector::DotProduct(RightVector, NormalizedVel);
+		if (RightCosAngle < 0)
+		{
+			ForwardDeltaDegree *= -1;
+		}
+
+		return ForwardDeltaDegree;
+	}
+
+	return 0.f;
 }
 
 void APlayerCharacter::SpawnMeshSlicer()
