@@ -108,21 +108,14 @@ void APlayerCharacter::Tick(float DeltaTime)
 	// 타겟팅한 적 있으면 Yaw 회전
 	if (bIsTargeting == true)
 	{
-		RotateToEnemyTarget();
+		RotateToEnemyTarget(DeltaTime, RotationInterpSpeed);
 		// 거리가 멀어지면 타겟 해제
-		if (GetDistanceTo(EnemyTarget) > 1000.f)
+		if (GetDistanceTo(EnemyTarget) > 800.f)
 		{
 			EnemyTarget = nullptr;
 			bIsTargeting = false;
 		}
 	}
-
-	/*
-	// 디버그
-	float forwardInput = InputComponent->GetAxisValue("Move Forward / Backward");
-	float rightInput = InputComponent->GetAxisValue("Move Right / Left");
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Cyan, FString::Printf(TEXT("F/B : %f    R/L : %f"), forwardInput, rightInput));
-	*/
 }
 
 // 키 입력
@@ -206,8 +199,11 @@ void APlayerCharacter::Attack()
 	// 오토 타겟팅할 적 탐색
 	TryAutoTargeting();
 
-	// 타겟 바라보게
-	RotateToEnemyTarget();
+	// TODO : 타겟 바라보게
+	if (EnemyTarget)
+	{
+		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), EnemyTarget->GetActorLocation()));
+	}
 
 	// 공격 분기점
 	if (GetCharacterMovement()->IsFalling() == true)
@@ -270,22 +266,44 @@ void APlayerCharacter::Dash()
 	FRotator baseRotation = GetActorRotation();
 	float dodgeAngle = CalculateDodgeDirection(inputVector, baseRotation);
 
-	// 회피 발동
-	if (dodgeAngle >= -45.0f && dodgeAngle <= 45.f)
+	if (bIsTargeting == true)
 	{
-		PlayAnimMontage(Dodges[0]); // 앞으로
+		// 조준 상태 회피
+		if (dodgeAngle >= -45.0f && dodgeAngle <= 45.f)
+		{
+			PlayAnimMontage(Dodges[0]); // 앞으로
+		}
+		else if (dodgeAngle > 45.f && dodgeAngle <= 135.f)
+		{
+			PlayAnimMontage(Dodges[1]); // 오른쪽으로
+		}
+		else if (dodgeAngle > -135.f && dodgeAngle < -45.f)
+		{
+			PlayAnimMontage(Dodges[2]); // 왼쪽으로
+		}
+		else // (dodgeAngle 135.f > && dodgeAngle < -135.f)
+		{
+			PlayAnimMontage(Dodges[3]); // 뒤로
+		}
 	}
-	else if (dodgeAngle > 45.f && dodgeAngle <= 135.f)
+	else // 비조준 상태 회피
 	{
-		PlayAnimMontage(Dodges[1]); // 오른쪽으로
-	}
-	else if (dodgeAngle > -135.f && dodgeAngle < -45.f)
-	{
-		PlayAnimMontage(Dodges[2]); // 왼쪽으로
-	}
-	else // (dodgeAngle 135.f > && dodgeAngle < -135.f)
-	{
-		PlayAnimMontage(Dodges[3]); // 뒤로
+		if (dodgeAngle >= -45.0f && dodgeAngle <= 45.f)
+		{
+			PlayAnimMontage(Dodges[4]); // 앞으로
+		}
+		else if (dodgeAngle > 45.f && dodgeAngle <= 135.f)
+		{
+			PlayAnimMontage(Dodges[5]); // 오른쪽으로
+		}
+		else if (dodgeAngle > -135.f && dodgeAngle < -45.f)
+		{
+			PlayAnimMontage(Dodges[6]); // 왼쪽으로
+		}
+		else // (dodgeAngle 135.f > && dodgeAngle < -135.f)
+		{
+			PlayAnimMontage(Dodges[7]); // 뒤로
+		}
 	}
 
 	// 이동속도 증가
@@ -427,17 +445,20 @@ AActor* APlayerCharacter::GetNearestEnemy()
 	return nearestEnemy;
 }
 
-void APlayerCharacter::RotateToEnemyTarget()
+void APlayerCharacter::RotateToEnemyTarget(float DeltaTime, float InterpSpeed)
 {	
 	// 타겟팅한 적이 있는 경우
 	if (EnemyTarget)
 	{
+		auto temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), EnemyTarget->GetActorLocation());
+
 		FRotator newRotation;
 		newRotation.Pitch = GetActorRotation().Pitch;
+		newRotation.Yaw = FMath::RInterpTo(GetActorRotation(), temp, DeltaTime, InterpSpeed).Yaw;
 		newRotation.Roll = GetActorRotation().Roll;
-		newRotation.Yaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), EnemyTarget->GetActorLocation()).Yaw;
 		SetActorRotation(newRotation);
 	}
+
 }
 
 void APlayerCharacter::FinishEnemy()

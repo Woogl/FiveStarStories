@@ -89,7 +89,7 @@ protected:
 	void TryAutoTargeting();
 	UFUNCTION(BlueprintCallable)
 	AActor* GetNearestEnemy();
-	void RotateToEnemyTarget();
+	void RotateToEnemyTarget(float DeltaTime, float InterpSpeed);
 
 	// 마무리 공격
 	UFUNCTION(BlueprintCallable)
@@ -141,6 +141,10 @@ private:
 	// 공격 콤보 카운트
 	int AttackCount = 0;
 	int MaxAttackCount;
+
+	// Tick에서 적을 바라볼 때 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float RotationInterpSpeed = 20.f;
 
 public:
 	/** Returns CameraBoom subobject **/
