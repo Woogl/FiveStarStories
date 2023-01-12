@@ -108,7 +108,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	// 타겟팅한 적 있으면 Yaw 회전
 	if (bIsTargeting == true)
 	{
-		RotateToEnemyTarget(DeltaTime, RotationInterpSpeed);
+		RotateToEnemyTarget(DeltaTime, RInterpSpeed);
 		// 거리가 멀어지면 타겟 해제
 		if (GetDistanceTo(EnemyTarget) > 800.f)
 		{
@@ -224,7 +224,7 @@ void APlayerCharacter::Guard()
 	// 상태 변수 변경
 	bIsBlocking = true;
 
-	// ABP의 상태 변수 변경
+	// ABP의 스테이트 변경
 	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	animIns->SetIsBlocking(true);
 
@@ -239,7 +239,7 @@ void APlayerCharacter::StopGuard()
 	// 상태 변수 변경
 	bIsBlocking = false;
 
-	// ABP의 상태 변수 변경
+	// ABP의 스테이트 변경
 	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	animIns->SetIsBlocking(false);
 
@@ -384,7 +384,7 @@ void APlayerCharacter::PerformJumpAttack()
 	PlayAnimMontage(JumpAttacks[0]);
 }
 
-void APlayerCharacter::TryAutoTargeting()
+bool APlayerCharacter::TryAutoTargeting()
 {
 	AActor* target = GetNearestEnemy();
 
@@ -393,13 +393,91 @@ void APlayerCharacter::TryAutoTargeting()
 	{
 		EnemyTarget = target;
 		bIsTargeting = true;
+		return true;
 	}
 	// 타게팅할 적을 못 찾았을 경우
 	else
 	{
 		EnemyTarget = nullptr;
 		bIsTargeting = false;
+		return false;
 	}
+
+	/* 완성하면 위의 거와 교체할 것
+	SearchEnemies();
+	ScoreEnemies();
+	SetEnemyTarget();
+	*/
+}
+
+AActor* APlayerCharacter::SearchEnemies()
+{
+	// 배열 초기화
+	SearchedEnemies.Empty();
+	DistanceScores.Empty();
+	AngleScores.Empty();
+	TotalScores.Empty();
+
+	// 트레이스 결과를 저장
+	TArray<FHitResult> hits;
+	// 트레이스 범위
+	FVector start = GetActorLocation();
+	FVector end = GetActorLocation();
+	float radius = 500.f;
+	// 찾을 오브젝트 타입 = Pawn
+	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
+	TEnumAsByte<EObjectTypeQuery> pawn = UEngineTypes::ConvertToObjectType(ECC_Pawn);
+	objectTypes.Add(pawn);
+	// 무시할 오브젝트 타입
+	TArray< AActor* > actorsToIgnore;
+
+	UKismetSystemLibrary::SphereTraceMultiForObjects(this, start, end, radius, objectTypes, false, actorsToIgnore,
+		EDrawDebugTrace::None, hits, true);
+
+	int i = 0;
+	// 모든 FHitResult에 for문 탐색
+	for (FHitResult hit : hits)
+	{
+		AActor* hitActor = hit.GetActor();
+		if (hitActor)
+		{
+			// 찾은 적들에 대해서
+			SearchedEnemies.Add(hitActor);
+			// 거리 점수 계산 (플레이어 위치 ~ 적 위치)
+			DistanceScores.Add(hit.Distance);
+			// 각도 점수 계산 (입력 방향 ~ 적을 향하는 방향)
+			float temp = FMath::Acos(FVector::DotProduct(GetLastMovementInputVector(), (hitActor->GetActorLocation() - GetActorLocation())));
+			AngleScores.Add(temp);
+			// 점수 합계
+			float temp2 = DistanceScores[i] + AngleScores[i];
+			i++;
+			TotalScores.Add(temp2);
+		}
+	}
+
+	// 점수 합계 낮은 적 찾기
+	int outIndex = 0;
+	float minScore = TotalScores[0];
+	for (int j = 0; j < TotalScores.Num(); j++)
+	{
+		if (minScore > TotalScores[j])
+		{
+			outIndex = j;
+			minScore = TotalScores[j];	// 더 작은 점수가 나오면 교체
+		}
+	}
+
+	return SearchedEnemies[outIndex];	// 거리 점수 + 각도 점수가 가장 적은 적을 반환
+}
+
+void APlayerCharacter::ScoreEnemies()
+{
+
+}
+
+void APlayerCharacter::SetEnemyTarget(AActor* Target)
+{
+
 }
 
 AActor* APlayerCharacter::GetNearestEnemy()
@@ -458,7 +536,6 @@ void APlayerCharacter::RotateToEnemyTarget(float DeltaTime, float InterpSpeed)
 		newRotation.Roll = GetActorRotation().Roll;
 		SetActorRotation(newRotation);
 	}
-
 }
 
 void APlayerCharacter::FinishEnemy()

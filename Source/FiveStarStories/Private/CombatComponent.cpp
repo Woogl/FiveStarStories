@@ -21,12 +21,13 @@ void UCombatComponent::BeginPlay()
 
 }
 
-
+/*
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 }
+*/
 
 
 void UCombatComponent::SetDamageInfo(float InBaseDamage, EAttackType InAttackType)
@@ -76,9 +77,6 @@ void UCombatComponent::AttackCheckTick()
 			// 새로 때린 액터만 추가
 			AlreadyHitActors.Add(hitActor);
 
-			// 대미지 가하기
-			DealDamage(hitActor);
-
 			// 역경직 발생
 			if (HitstopTime > 0.f)
 			{
@@ -93,7 +91,11 @@ void UCombatComponent::AttackCheckTick()
 				{
 					player->SpawnMeshSlicer();
 				}
+				continue;
 			}
+
+			// 대미지 가하기
+			DealDamage(hitActor);
 		}
 	}
 }

@@ -86,9 +86,15 @@ protected:
 	void PerformJumpAttack();
 
 	// 오토 타게팅 
-	void TryAutoTargeting();
+	bool TryAutoTargeting();
+	UFUNCTION(BlueprintCallable)
+	AActor* SearchEnemies();
+	void ScoreEnemies();
+	void SetEnemyTarget(AActor* Target);
 	UFUNCTION(BlueprintCallable)
 	AActor* GetNearestEnemy();
+	
+	// 적을 향해 부드럽게 회전
 	void RotateToEnemyTarget(float DeltaTime, float InterpSpeed);
 
 	// 마무리 공격
@@ -142,9 +148,15 @@ private:
 	int AttackCount = 0;
 	int MaxAttackCount;
 
-	// Tick에서 적을 바라볼 때 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료)
+	// Tick에서 적을 바라볼 때 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료 )
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float RotationInterpSpeed = 20.f;
+	float RInterpSpeed = 0.f;
+
+	// 타게팅 대상 후보, 점수
+	TArray<AActor*> SearchedEnemies;
+	TArray<float> DistanceScores;
+	TArray<float> AngleScores;
+	TArray<float> TotalScores;
 
 public:
 	/** Returns CameraBoom subobject **/
