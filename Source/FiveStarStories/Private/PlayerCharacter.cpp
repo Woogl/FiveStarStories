@@ -402,22 +402,29 @@ bool APlayerCharacter::TryAutoTargeting()
 		bIsTargeting = false;
 		return false;
 	}
-
-	/* 완성하면 위의 거와 교체할 것
-	SearchEnemies();
-	ScoreEnemies();
-	SetEnemyTarget();
-	*/
 }
 
-AActor* APlayerCharacter::SearchEnemies()
+bool APlayerCharacter::NewTryAutoTargeting()
+{
+	SearchEnemies();
+	//ScoreEnemies();
+	//SetEnemyTarget();
+	ClearScores();
+
+	return false;
+}
+
+void APlayerCharacter::ClearScores()
 {
 	// 배열 초기화
 	SearchedEnemies.Empty();
 	DistanceScores.Empty();
 	AngleScores.Empty();
 	TotalScores.Empty();
+}
 
+AActor* APlayerCharacter::SearchEnemies()
+{
 	// 트레이스 결과를 저장
 	TArray<FHitResult> hits;
 	// 트레이스 범위
@@ -432,7 +439,7 @@ AActor* APlayerCharacter::SearchEnemies()
 	TArray< AActor* > actorsToIgnore;
 
 	UKismetSystemLibrary::SphereTraceMultiForObjects(this, start, end, radius, objectTypes, false, actorsToIgnore,
-		EDrawDebugTrace::None, hits, true);
+		EDrawDebugTrace::ForDuration, hits, true, FColor::Red, FColor::Green, 3.0f);
 
 	int i = 0;
 	// 모든 FHitResult에 for문 탐색
@@ -458,7 +465,7 @@ AActor* APlayerCharacter::SearchEnemies()
 	// 점수 합계 낮은 적 찾기
 	int outIndex = 0;
 	float minScore = TotalScores[0];
-	for (int j = 0; j < TotalScores.Num(); j++)
+	for (int j = 0; j < SearchedEnemies.Num(); j++)
 	{
 		if (minScore > TotalScores[j])
 		{
@@ -467,7 +474,17 @@ AActor* APlayerCharacter::SearchEnemies()
 		}
 	}
 
-	return SearchedEnemies[outIndex];	// 거리 점수 + 각도 점수가 가장 적은 적을 반환
+	
+	if (SearchedEnemies[outIndex])
+	{
+		UKismetSystemLibrary::PrintString(this, SearchedEnemies[outIndex]->GetName());
+		return SearchedEnemies[outIndex];	// 거리 점수 + 각도 점수가 가장 적은 적을 반환
+	}
+	else
+	{
+		UKismetSystemLibrary::PrintString(this, TEXT("null"));
+		return nullptr;
+	}
 }
 
 void APlayerCharacter::ScoreEnemies()

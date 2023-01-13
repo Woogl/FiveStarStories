@@ -87,11 +87,9 @@ protected:
 
 	// 오토 타게팅 
 	bool TryAutoTargeting();
-	UFUNCTION(BlueprintCallable)
 	AActor* SearchEnemies();
 	void ScoreEnemies();
 	void SetEnemyTarget(AActor* Target);
-	UFUNCTION(BlueprintCallable)
 	AActor* GetNearestEnemy();
 	
 	// 적을 향해 부드럽게 회전
@@ -151,6 +149,10 @@ private:
 	// Tick에서 적을 바라볼 때 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료 )
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float RInterpSpeed = 0.f;
+
+	UFUNCTION(BlueprintCallable)
+	bool NewTryAutoTargeting();
+	void ClearScores();
 
 	// 타게팅 대상 후보, 점수
 	TArray<AActor*> SearchedEnemies;
